@@ -357,7 +357,11 @@ export function renderFittingMatrix() {
             <tr>
                 <th style="min-width: 150px; padding:18px 16px; color:#64748b; font-size:13px; font-weight:700; letter-spacing:0.5px; text-align:left;">ITEM NAME</th>
                 ${sizes.map(s => `<th style="padding:18px 16px; text-align:center; color:#64748b; font-size:13px; font-weight:700; letter-spacing:0.5px;">
-                    <span>${s}</span>
+                    <div style="display:flex; justify-content:center; align-items:center;">
+                        <span>${s}</span>
+                        <i data-lucide="edit-2" class="cursor-pointer admin-only" style="margin-left:8px; color:#0f172a; opacity:0.6;" size="14" onclick="window.editFittingSize('${s}', '${currentFittingTab}')" title="Edit Size"></i>
+                        <i data-lucide="trash-2" class="cursor-pointer admin-only" style="margin-left:4px; color:var(--danger); opacity:0.6;" size="14" onclick="window.deleteFittingSize('${s}', '${currentFittingTab}')" title="Delete Size"></i>
+                    </div>
                 </th>`).join('')}
                 <th class="admin-only" style="cursor:pointer; color:var(--primary); padding:18px 16px; font-size:13px; font-weight:700; text-align:center;" onclick="window.addFittingSize('${currentFittingTab}')">
                     + Add Size
