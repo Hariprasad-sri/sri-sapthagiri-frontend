@@ -2,9 +2,9 @@
 // Dynamic BASE_URL detection
 const LIVE_BACKEND_URL = 'https://sri-sapthagiri-api.onrender.com/api';
 
-export const BASE_URL = (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:5001/api'
-    : LIVE_BACKEND_URL;
+// Point everything to the live backend for now so it works whether opened locally or live
+export const BASE_URL = LIVE_BACKEND_URL;
+
 
 
 
