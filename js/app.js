@@ -1545,11 +1545,13 @@ function openRequestModal(isInternal = false) {
         sourceLabel.textContent = isInternal ? 'FROM (Source Godown)' : 'Source Godown';
     }
 
-    // Reset destination type
+    // Reset destination type and hide/show customer group
     const destTypeGroup = document.getElementById('req-dest-type-group');
+    const customerGroup = document.getElementById('req-customer-group');
     if (isInternal) {
         document.getElementById('req-dest-type').value = 'godown';
         if (destTypeGroup) destTypeGroup.style.display = 'none';
+        if (customerGroup) customerGroup.style.display = 'none';
 
         // Adjust grid for single column if Dest Type is hidden
         const destGrid = document.getElementById('req-dest-grid');
@@ -1557,6 +1559,7 @@ function openRequestModal(isInternal = false) {
     } else {
         document.getElementById('req-dest-type').value = 'store';
         if (destTypeGroup) destTypeGroup.style.display = 'block';
+        if (customerGroup) customerGroup.style.display = 'block';
 
         const destGrid = document.getElementById('req-dest-grid');
         if (destGrid) destGrid.style.gridTemplateColumns = '140px 1fr';
