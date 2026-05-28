@@ -1,11 +1,11 @@
 // API client — all fetch calls go through here
 // Dynamic BASE_URL detection
-// Change this to your live backend URL when deployed (e.g. 'https://your-backend.onrender.com/api')
-const LIVE_BACKEND_URL = 'https://www.srisapthagirisystems.in/api';
+const LIVE_BACKEND_URL = 'https://sri-sapthagiri-api.onrender.com/api';
 
 export const BASE_URL = (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5001/api'
     : LIVE_BACKEND_URL;
+
 
 
 function getUser() {
