@@ -1144,8 +1144,8 @@ async function handleProductSubmit(e) {
 
     if (isMotor) {
         if (!hp) { showError('prod-hp', 'err-hp', 'Horsepower is required.'); hasError = true; }
-        if (!type) { showError('prod-type', 'err-type', 'Motor type is required.'); hasError = true; }
-        if (!name && !type) { showError('prod-name', 'err-name', 'Motor name is required.'); hasError = true; }
+        if (!type) { showError('prod-type', 'err-type', 'Motor Name is required.'); hasError = true; }
+        if (!name && !type) { showError('prod-name', 'err-name', 'Motor Name is required.'); hasError = true; }
     } else if (isSupremeOrFitting) {
         if (!model) { showError('prod-model', 'err-model', 'Size is required.'); hasError = true; }
     } else {
