@@ -616,8 +616,8 @@ export function renderRequests() {
                         </button>
                     ` : ''}
                     
-                    ${state.currentUser === 'transporter' && r.status === 'pending' ? `
-                        <button class="glass-btn" style="padding:6px;background:rgba(16,185,129,0.2);color:#10b981;" data-action="approve" data-id="${getId(r)}" title="Accept">
+                    ${state.currentUser === 'admin' && r.status === 'pending' ? `
+                        <button class="glass-btn" style="padding:6px;background:rgba(16,185,129,0.2);color:#10b981;" data-action="approve" data-id="${getId(r)}" title="Approve">
                             <i data-lucide="check-circle" size="16"></i>
                         </button>
                         <button class="glass-btn" style="padding:6px;background:rgba(239,68,68,0.2);color:#ef4444;" data-action="reject" data-id="${getId(r)}" title="Reject">
@@ -625,8 +625,8 @@ export function renderRequests() {
                         </button>
                     ` : ''}
 
-                    ${state.currentUser === 'admin' && r.status === 'pending' ? `
-                        <span style="font-size:11px;color:var(--text-muted);font-style:italic;">Waiting for Transporter</span>
+                    ${state.currentUser !== 'admin' && r.status === 'pending' ? `
+                        <span style="font-size:11px;color:var(--text-muted);font-style:italic;">Waiting for Admin Approval</span>
                     ` : ''}
 
                     ${state.currentUser === 'admin' ? `

@@ -1800,10 +1800,7 @@ document.getElementById('btn-confirm-approve')?.addEventListener('click', async 
 // HANDLE APPROVE / REJECT
 // ──────────────────────────────────────────
 async function handleRequest(id, status) {
-    if (state.currentUser === 'admin' && status === 'approved') {
-        alert('Action Blocked: Only the Transporter can accept/approve this challan.');
-        return;
-    }
+
 
     if (status === 'approved') {
         openApproveChallanModal(id);
