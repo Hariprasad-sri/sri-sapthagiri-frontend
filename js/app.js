@@ -977,7 +977,7 @@ function openProductModal(category, id = null) {
     }
     document.getElementById('prod-subcategory-group').style.display = isSupremeOrFitting ? 'block' : 'none';
     document.getElementById('prod-location-group').style.display = isSupremeOrFitting ? 'none' : 'block';
-    document.getElementById('prod-stock-group').style.display = isSupremeOrFitting ? 'none' : 'block';
+    document.getElementById('prod-stock-group').style.display = (isSupremeOrFitting || isMotor) ? 'none' : 'block';
     document.getElementById('prod-low-limit-group').style.display = isSupremeOrFitting ? 'none' : 'block';
     document.getElementById('prod-model-group').style.display = isMotor ? 'none' : 'block';
 
@@ -1026,7 +1026,7 @@ function openProductModal(category, id = null) {
         document.getElementById('modal-submit-button').innerHTML = '<i data-lucide="save"></i> Update Product';
         // Hide serial fields on edit (serials managed via Add Stock)
         document.getElementById('prod-serial-group').style.display = 'none';
-        document.getElementById('prod-stock-group').style.display = isSupreme ? 'none' : 'block';
+        document.getElementById('prod-stock-group').style.display = (isSupremeOrFitting || isMotor) ? 'none' : 'block';
         document.getElementById('prod-stock').readOnly = false;
         document.getElementById('prod-stock').style.background = '';
         document.getElementById('prod-stock').style.color = '';
@@ -1047,7 +1047,7 @@ function openProductModal(category, id = null) {
         document.getElementById('modal-title').textContent = isMotor ? 'Create New Motor Entry' : (isFitting ? 'Add New Fitting' : 'Add New Product');
         document.getElementById('modal-submit-button').innerHTML = isMotor ? '<i data-lucide="save"></i> Create Motor' : (isFitting ? '<i data-lucide="save"></i> Save Fitting' : '<i data-lucide="save"></i> Save Product');
         document.getElementById('prod-serial-group').style.display = (isSupremeOrFitting || isMotor) ? 'none' : 'block';
-        document.getElementById('prod-stock-group').style.display = isSupremeOrFitting ? 'none' : 'block';
+        document.getElementById('prod-stock-group').style.display = (isSupremeOrFitting || isMotor) ? 'none' : 'block';
         const serialsWrapper = document.getElementById('modal-serials-list-wrapper');
         if (serialsWrapper) serialsWrapper.style.display = 'none';
         // Reset serial count badge
