@@ -218,12 +218,12 @@ function renderPipeDashboard() {
                     </td>
                     <td style="padding:18px 16px; color:#0f172a; font-weight:700; font-size:15px;">
                         <div style="display:flex; align-items:center;">
-                            ${size} <i data-lucide="edit-2" class="cursor-pointer admin-only" style="margin-left: 10px; color: #0f172a; opacity:0.8;" size="14" onclick="window.editPipeSize('${size}', '${pipeType}')" title="Edit Size"></i>
+                            ${size} <i data-lucide="edit-2" class="cursor-pointer admin-only" style="margin-left: 10px; color: #0f172a; opacity:0.8;" size="14" onclick="window.editPipeSize('${size.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', '${pipeType.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')" title="Edit Size"></i>
                         </div>
                     </td>
                     ${values.join('')}
                     <td style="padding:18px 16px; text-align:center;">
-                        ${firstProd ? `<button class="glass-btn admin-only" style="padding:4px;color:var(--danger);background:rgba(239,68,68,0.05);margin:0 auto;" title="Delete Row" onclick="window.deletePipeSizeRow('${size}', '${pipeType}')">
+                        ${firstProd ? `<button class="glass-btn admin-only" style="padding:4px;color:var(--danger);background:rgba(239,68,68,0.05);margin:0 auto;" title="Delete Row" onclick="window.deletePipeSizeRow('${size.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', '${pipeType.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')">
                             <i data-lucide="trash-2" size="14"></i>
                         </button>` : ''}
                     </td>
@@ -244,7 +244,7 @@ function renderPipeDashboard() {
                     <td style="padding:18px 16px; color:#0f172a; font-weight:700; font-size:15px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <div style="display:flex; align-items:center;">
-                                ${size} <i data-lucide="edit-2" class="cursor-pointer admin-only" style="margin-left: 10px; color: #0f172a; opacity:0.8;" size="14" onclick="window.editPipeSize('${size}', '${currentPipeTab}')" title="Edit Size"></i>
+                                ${size} <i data-lucide="edit-2" class="cursor-pointer admin-only" style="margin-left: 10px; color: #0f172a; opacity:0.8;" size="14" onclick="window.editPipeSize('${size.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', '${currentPipeTab.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')" title="Edit Size"></i>
                             </div>
                             <div data-id="${getId(p)}" data-cat="supreme" data-subcat="${currentPipeTab.replace(/"/g, '&quot;')}" data-size="${size.replace(/"/g, '&quot;')}" data-col="${pipeType.replace(/"/g, '&quot;')}" data-value="${stockVal}" style="font-size:15px; font-weight:600; color:#2563eb; background:rgba(37,99,235,0.05); padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="window.openMatrixAddStockModalFromElement(this)">
                                 Stock: ${stockVal}
@@ -359,8 +359,8 @@ export function renderFittingMatrix() {
                 ${sizes.map(s => `<th style="padding:18px 16px; text-align:center; color:#64748b; font-size:13px; font-weight:700; letter-spacing:0.5px;">
                     <div style="display:flex; justify-content:center; align-items:center;">
                         <span>${s}</span>
-                        <i data-lucide="edit-2" class="cursor-pointer admin-only" style="margin-left:8px; color:#0f172a; opacity:0.6;" size="14" onclick="window.editFittingSize('${s}', '${currentFittingTab}')" title="Edit Size"></i>
-                        <i data-lucide="trash-2" class="cursor-pointer admin-only" style="margin-left:4px; color:var(--danger); opacity:0.6;" size="14" onclick="window.deleteFittingSize('${s}', '${currentFittingTab}')" title="Delete Size"></i>
+                        <i data-lucide="edit-2" class="cursor-pointer admin-only" style="margin-left:8px; color:#0f172a; opacity:0.6;" size="14" onclick="window.editFittingSize('${s.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', '${currentFittingTab.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')" title="Edit Size"></i>
+                        <i data-lucide="trash-2" class="cursor-pointer admin-only" style="margin-left:4px; color:var(--danger); opacity:0.6;" size="14" onclick="window.deleteFittingSize('${s.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', '${currentFittingTab.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')" title="Delete Size"></i>
                     </div>
                 </th>`).join('')}
                 <th class="admin-only" style="cursor:pointer; color:var(--primary); padding:18px 16px; font-size:13px; font-weight:700; text-align:center;" onclick="window.addFittingSize('${currentFittingTab}')">

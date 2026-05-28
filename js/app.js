@@ -231,8 +231,8 @@ window.renderManageSizesList = function() {
         <div class="glass" style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-radius:8px;">
             <span style="font-weight:600; font-size:15px;">${size}</span>
             <div style="display:flex; gap:12px;">
-                <i data-lucide="edit-2" class="cursor-pointer" style="color:var(--primary);" onclick="window.handleEditSizeInModal('${size.replace(/'/g, "\\'")}')"></i>
-                <i data-lucide="trash-2" class="cursor-pointer" style="color:var(--danger);" onclick="window.handleDeleteSizeInModal('${size.replace(/'/g, "\\'")}')"></i>
+                <i data-lucide="edit-2" class="cursor-pointer" style="color:var(--primary);" onclick="window.handleEditSizeInModal('${size.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')"></i>
+                <i data-lucide="trash-2" class="cursor-pointer" style="color:var(--danger);" onclick="window.handleDeleteSizeInModal('${size.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')"></i>
             </div>
         </div>
     `).join('');
