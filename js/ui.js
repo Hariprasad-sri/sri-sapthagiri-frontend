@@ -1,7 +1,9 @@
 import { state } from './state.js';
 
 export function initIcons() {
-    if (window.lucide) lucide.createIcons();
+    if (window.lucide) {
+        try { lucide.createIcons(); } catch (e) { console.error('Lucide error:', e); }
+    }
 }
 
 export function renderAll() {

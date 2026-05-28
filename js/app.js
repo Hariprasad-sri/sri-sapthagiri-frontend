@@ -174,9 +174,7 @@ function renderPipeCategoriesList() {
     }).join('');
 
     // Re-initialize icons since we injected new HTML
-    if (window.lucide && window.lucide.createIcons) {
-        window.lucide.createIcons();
-    }
+    initIcons();
 }
 
 function openNewPipeCategoryModal(type = 'supreme') {
@@ -2205,7 +2203,7 @@ function openCompleteStockReport() {
         `;
     }).join('');
 
-    if (window.lucide) lucide.createIcons();
+    initIcons();
 }
 
 function printInlineStockReport() {
@@ -2354,5 +2352,5 @@ function renderTransportHistoryTables() {
         }
     }
 
-    if (window.lucide) lucide.createIcons();
+    initIcons();
 }
