@@ -960,21 +960,25 @@ function openProductModal(category, id = null) {
     document.getElementById('prod-cri-unit-group').style.display = 'none';
     document.getElementById('motor-fields').style.display = isMotor ? 'block' : 'none';
     
-    // Toggle field visibility for supreme pipes (only category and size needed)
-    document.getElementById('prod-name-group').style.display = (isMotor || isSupreme) ? 'none' : 'block';
+    // Toggle field visibility for supreme pipes and fittings (only category and size needed)
+    document.getElementById('prod-name-group').style.display = (isMotor || isSupremeOrFitting) ? 'none' : 'block';
     
     const nameInput = document.getElementById('prod-name');
     if (nameInput) {
-        if (isMotor || isSupreme) {
+        if (isMotor || isSupremeOrFitting) {
             nameInput.removeAttribute('required');
         } else {
             nameInput.setAttribute('required', '');
         }
     }
+    const catLabel = document.getElementById('prod-subcategory-label');
+    if (catLabel) {
+        catLabel.textContent = isSupreme ? 'Pipe Category' : 'Fitting Category';
+    }
     document.getElementById('prod-subcategory-group').style.display = isSupremeOrFitting ? 'block' : 'none';
-    document.getElementById('prod-location-group').style.display = isSupreme ? 'none' : 'block';
-    document.getElementById('prod-stock-group').style.display = isSupreme ? 'none' : 'block';
-    document.getElementById('prod-low-limit-group').style.display = isSupreme ? 'none' : 'block';
+    document.getElementById('prod-location-group').style.display = isSupremeOrFitting ? 'none' : 'block';
+    document.getElementById('prod-stock-group').style.display = isSupremeOrFitting ? 'none' : 'block';
+    document.getElementById('prod-low-limit-group').style.display = isSupremeOrFitting ? 'none' : 'block';
     document.getElementById('prod-model-group').style.display = isMotor ? 'none' : 'block';
 
     // Toggle label and placeholder of Model / Pipe Size field
@@ -982,8 +986,8 @@ function openProductModal(category, id = null) {
     const modelInput = document.getElementById('prod-model');
     const modelBtn = document.querySelector('#prod-model-group button');
     if (modelLabel && modelInput) {
-        if (isSupreme) {
-            modelLabel.textContent = 'Pipe Size';
+        if (isSupremeOrFitting) {
+            modelLabel.textContent = isSupreme ? 'Pipe Size' : 'Fitting Size';
             modelInput.placeholder = 'e.g. 4" or 1/2"';
             if (modelBtn) modelBtn.style.display = 'none';
         } else {
@@ -1040,10 +1044,10 @@ function openProductModal(category, id = null) {
         document.getElementById('prod-stock').style.background = '';
         document.getElementById('prod-stock').style.color = '';
         document.getElementById('prod-stock-hint').style.display = 'none';
-        document.getElementById('modal-title').textContent = isMotor ? 'Create New Motor Entry' : 'Add New Product';
-        document.getElementById('modal-submit-button').innerHTML = isMotor ? '<i data-lucide="save"></i> Create Motor' : '<i data-lucide="save"></i> Save Product';
+        document.getElementById('modal-title').textContent = isMotor ? 'Create New Motor Entry' : (isFitting ? 'Add New Fitting' : 'Add New Product');
+        document.getElementById('modal-submit-button').innerHTML = isMotor ? '<i data-lucide="save"></i> Create Motor' : (isFitting ? '<i data-lucide="save"></i> Save Fitting' : '<i data-lucide="save"></i> Save Product');
         document.getElementById('prod-serial-group').style.display = (isSupremeOrFitting || isMotor) ? 'none' : 'block';
-        document.getElementById('prod-stock-group').style.display = isSupreme ? 'none' : 'block';
+        document.getElementById('prod-stock-group').style.display = isSupremeOrFitting ? 'none' : 'block';
         const serialsWrapper = document.getElementById('modal-serials-list-wrapper');
         if (serialsWrapper) serialsWrapper.style.display = 'none';
         // Reset serial count badge
@@ -1103,11 +1107,11 @@ async function handleProductSubmit(e) {
     const phase = document.getElementById('prod-phase')?.value || 'Single Phase';
     const type = document.getElementById('prod-type')?.value.trim() || '';
     const location = document.getElementById('prod-location').value;
-    const stock = isSupreme ? 0 : (parseInt(document.getElementById('prod-stock').value) || 0);
-    const lowStockLimit = isSupreme ? 10 : (parseInt(document.getElementById('prod-low-limit').value) || 10);
+    const stock = isSupremeOrFitting ? 0 : (parseInt(document.getElementById('prod-stock').value) || 0);
+    const lowStockLimit = isSupremeOrFitting ? 10 : (parseInt(document.getElementById('prod-low-limit').value) || 10);
     const subCategory = document.getElementById('prod-subcategory')?.value.trim() || '';
 
-    if (isSupreme) {
+    if (isSupremeOrFitting) {
         name = (subCategory || 'General') + ' ' + model;
     }
 
@@ -1140,12 +1144,12 @@ async function handleProductSubmit(e) {
         if (!hp) { showError('prod-hp', 'err-hp', 'Horsepower is required.'); hasError = true; }
         if (!type) { showError('prod-type', 'err-type', 'Motor type is required.'); hasError = true; }
         if (!name && !type) { showError('prod-name', 'err-name', 'Motor name is required.'); hasError = true; }
-    } else if (isSupreme) {
-        if (!model) { showError('prod-model', 'err-model', 'Pipe Size is required.'); hasError = true; }
+    } else if (isSupremeOrFitting) {
+        if (!model) { showError('prod-model', 'err-model', 'Size is required.'); hasError = true; }
     } else {
         if (!name) { showError('prod-name', 'err-name', 'Product name is required.'); hasError = true; }
     }
-    if (!isSupreme && lowStockLimit < 0) {
+    if (!isSupremeOrFitting && lowStockLimit < 0) {
         document.getElementById('err-low-limit').textContent = 'Alert limit cannot be negative.';
         hasError = true;
     }
