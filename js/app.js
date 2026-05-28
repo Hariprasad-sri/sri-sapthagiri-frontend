@@ -1100,6 +1100,8 @@ async function handleProductSubmit(e) {
     const category = document.getElementById('prod-category').value;
     const isMotor = category === 'cri';
     const isSupreme = category === 'supreme';
+    const isFitting = category === 'fitting';
+    const isSupremeOrFitting = isSupreme || isFitting;
     let name = document.getElementById('prod-name').value.trim();
     const model = document.getElementById('prod-model')?.value.trim() || '';
     const unit = document.getElementById('prod-unit')?.value.trim() || '';
