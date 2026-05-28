@@ -194,6 +194,113 @@ async function openManagePipeCategoriesModal(type = 'supreme') {
     document.getElementById('pipe-categories-modal').style.display = 'flex';
 }
 
+window.openManageSizesModal = async function(type) {
+    if (type === 'pipe' && currentPipeTab === 'General') {
+        return openEditPipeColumnsModal();
+    }
+
+    const tab = type === 'pipe' ? currentPipeTab : currentFittingTab;
+    document.getElementById('manage-sizes-title').textContent = `Manage Columns for ${tab}`;
+    document.getElementById('new-manage-size-name').value = '';
+    
+    let sizes = [];
+    if (type === 'pipe') {
+        const prods = state.products.filter(p => p.category === 'supreme' && ((p.subCategory || 'General').trim()) === tab);
+        sizes = [...new Set(prods.map(p => p.specs?.size || p.size || p.model || '—'))].filter(s => s !== '—').sort();
+    } else {
+        const prods = state.products.filter(p => p.category === 'fitting' && (p.subCategory || (p.name ? p.name.split(' ')[0] + ' FITTINGS' : 'UNCATEGORIZED')) === tab);
+        sizes = [...new Set(prods.map(p => p.specs?.size || p.size || '-'))].filter(s => s !== '-').sort();
+    }
+
+    window._currentManageSizesContext = { type, tab, sizes };
+
+    renderManageSizesList();
+    document.getElementById('manage-sizes-modal').style.display = 'flex';
+};
+
+window.renderManageSizesList = function() {
+    const { type, tab, sizes } = window._currentManageSizesContext;
+    const list = document.getElementById('manage-sizes-list');
+    
+    if (sizes.length === 0) {
+        list.innerHTML = `<div style="color:var(--text-muted); font-style:italic;">No sizes defined yet.</div>`;
+        return;
+    }
+
+    list.innerHTML = sizes.map(size => `
+        <div class="glass" style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-radius:8px;">
+            <span style="font-weight:600; font-size:15px;">${size}</span>
+            <div style="display:flex; gap:12px;">
+                <i data-lucide="edit-2" class="cursor-pointer" style="color:var(--primary);" onclick="window.handleEditSizeInModal('${size.replace(/'/g, "\\'")}')"></i>
+                <i data-lucide="trash-2" class="cursor-pointer" style="color:var(--danger);" onclick="window.handleDeleteSizeInModal('${size.replace(/'/g, "\\'")}')"></i>
+            </div>
+        </div>
+    `).join('');
+    lucide.createIcons();
+};
+
+window.handleAddNewSizeInModal = async function() {
+    if (state.currentUser !== 'admin') return alert('Only admins can add sizes.');
+    const { type, tab, sizes } = window._currentManageSizesContext;
+    const newSize = document.getElementById('new-manage-size-name').value.trim();
+    if (!newSize) return;
+
+    try {
+        if (type === 'pipe') {
+            const items = [...new Set(state.products.filter(p => (p.subCategory || 'General').trim() === tab && p.category === 'supreme').map(p => {
+                let n = p.name || '';
+                const sz = p.specs?.size || p.size || p.model || '—';
+                if (sz !== '—' && n.endsWith(sz)) n = n.substring(0, n.length - sz.length).trim();
+                return n || 'PIPE';
+            }))].filter(Boolean);
+            const itemName = items.length > 0 ? items[0] : 'PIPE';
+            await window.setMatrixStock(null, 'supreme', tab, newSize, itemName, 0, null);
+        } else {
+            const items = [...new Set(state.products.filter(p => (p.subCategory || 'PVC FITTINGS') === tab && p.category === 'fitting').map(p => {
+                let n = p.name || '';
+                const tabStr = tab.replace(' FITTINGS', '');
+                if (n.toUpperCase().startsWith(tabStr.toUpperCase())) n = n.substring(tabStr.length).trim();
+                if (n.toUpperCase().startsWith('FITTINGS')) n = n.substring(8).trim();
+                if (n.toUpperCase().startsWith('FITTING')) n = n.substring(7).trim();
+                const sz = p.specs?.size || p.size || '-';
+                if (sz !== '-' && n.endsWith(sz)) n = n.substring(0, n.length - sz.length).trim();
+                return n.toUpperCase() || 'UNKNOWN';
+            }))].filter(Boolean);
+            const itemName = items.length > 0 ? items[0] : 'ELBOW';
+            await window.setMatrixStock(null, 'fitting', tab, newSize, itemName, 0, null);
+        }
+
+        document.getElementById('new-manage-size-name').value = '';
+        window._currentManageSizesContext.sizes.push(newSize);
+        window._currentManageSizesContext.sizes.sort();
+        renderManageSizesList();
+        renderAll();
+    } catch (e) {
+        console.error(e);
+        alert('Failed to add new size');
+    }
+};
+
+window.handleEditSizeInModal = async function(oldSize) {
+    const { type, tab } = window._currentManageSizesContext;
+    if (type === 'pipe') {
+        await window.editPipeSize(oldSize, tab);
+    } else {
+        await window.editFittingSize(oldSize, tab);
+    }
+    window.openManageSizesModal(type);
+};
+
+window.handleDeleteSizeInModal = async function(size) {
+    const { type, tab } = window._currentManageSizesContext;
+    if (type === 'pipe') {
+        await window.deletePipeSizeRow(size, tab);
+    } else {
+        await window.deleteFittingSize(size, tab);
+    }
+    window.openManageSizesModal(type);
+};
+
 async function openEditPipeColumnsModal() {
     await refreshPipeColumns();
     document.getElementById('pipe-columns-modal').style.display = 'flex';

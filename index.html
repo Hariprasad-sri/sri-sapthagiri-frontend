@@ -446,7 +446,7 @@
                         <button class="glass-btn" onclick="openManagePipeCategoriesModal('supreme')"
                             style="background: white; border: 1px solid #2563eb; color: #2563eb; font-weight: 500; padding: 8px 16px; border-radius: 6px;">Manage
                             Categories</button>
-                        <button class="glass-btn" onclick="openEditPipeColumnsModal()"
+                        <button class="glass-btn" onclick="openManageSizesModal('pipe')"
                             style="background: white; border: 1px solid #2563eb; color: #2563eb; font-weight: 500; padding: 8px 16px; border-radius: 6px;">Edit
                             Columns</button>
                         <button class="glass-btn admin-only" onclick="openProductModal('supreme')"
@@ -499,7 +499,7 @@
                             style="background: white; border: 1px solid #2563eb; color: #2563eb; font-weight: 600; padding: 8px 16px; border-radius: 6px;">
                             <i data-lucide="layers" size="16"></i> Manage Categories
                         </button>
-                        <button class="glass-btn" onclick="openEditPipeColumnsModal()"
+                        <button class="glass-btn" onclick="openManageSizesModal('fitting')"
                             style="background: white; border: 1px solid #2563eb; color: #2563eb; font-weight: 600; padding: 8px 16px; border-radius: 6px;">
                             <i data-lucide="edit-3" size="16"></i> Edit Sizes
                         </button>
@@ -1013,6 +1013,35 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div id="manage-sizes-modal" class="modal-overlay">
+        <div class="glass modal-content" style="max-width: 520px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 id="manage-sizes-title" style="margin:0;">Manage Sizes</h2>
+                <button class="glass-btn" onclick="closeModal('manage-sizes-modal')" style="padding:8px;"><i data-lucide="x"></i></button>
+            </div>
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label>Add New Size</label>
+                <div style="display:flex; gap:8px; margin-top: 6px;">
+                    <input type="text" id="new-manage-size-name" class="form-control" placeholder="e.g. 1/2 inch" style="flex:1;">
+                    <button type="button" class="glass-btn" onclick="window.handleAddNewSizeInModal()" style="background:var(--secondary); color:white; font-weight:600; white-space:nowrap; padding: 0 16px;">
+                        Add
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label style="font-weight:600; display:block; margin-bottom:12px;">Existing Sizes</label>
+                <div id="manage-sizes-list" style="display:grid; gap:8px; max-height:300px; overflow-y:auto; padding: 4px;">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button type="button" class="glass-btn" style="background:var(--primary); color:white; padding: 10px 24px;" onclick="closeModal('manage-sizes-modal')">
+                    Done
+                </button>
+            </div>
         </div>
     </div>
 
