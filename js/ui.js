@@ -158,7 +158,7 @@ function renderPipeDashboard() {
         .sort((a, b) => (a.order || 0) - (b.order || 0) || a.name.localeCompare(b.name));
 
     const tabs = activeCategories.length > 0
-        ? ['General', ...activeCategories.map(c => c.name)]
+        ? ['General', ...new Set(activeCategories.map(c => c.name))]
         : [...new Set(products.map(getPipeType))];
 
     if (!currentPipeTab || !tabs.includes(currentPipeTab)) {
@@ -290,7 +290,7 @@ export function renderFittingMatrix() {
             .sort((a, b) => (a.order || 0) - (b.order || 0) || a.name.localeCompare(b.name))
         : [];
         
-    const explicitNames = activeCategories.map(c => c.name);
+    const explicitNames = [...new Set(activeCategories.map(c => c.name))];
     const implicitNames = [...new Set(fittingProducts.map(getTabName))].filter(n => !explicitNames.includes(n));
     const tabs = [...explicitNames, ...implicitNames.sort()];
     
