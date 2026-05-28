@@ -214,7 +214,7 @@ async function handleCreatePipeCategory(e) {
         document.getElementById('pipe-category-modal').style.display = 'none';
     } catch (err) {
         console.error('Could not create pipe category:', err);
-        alert('Could not create category. Please try again.');
+        alert('Error creating category: ' + err.message + '\n\nPlease take a screenshot of this error.');
     }
 }
 
