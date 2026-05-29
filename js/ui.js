@@ -1,4 +1,4 @@
-import { state } from './state.js?v=1.0.8';
+import { state } from './state.js?v=1.0.9';
 
 export function initIcons() {
     if (window.lucide) {
@@ -287,7 +287,7 @@ function renderPipeDashboard() {
 window.setPipeTab = async function(tab) {
     currentPipeTab = tab;
     try {
-        const { fetchPipeColumns } = await import('./api.js?v=1.0.8');
+        const { fetchPipeColumns } = await import('./api.js?v=1.0.9');
         const columns = await fetchPipeColumns(tab);
         state.pipeColumns.splice(0, state.pipeColumns.length, ...columns);
     } catch (err) {
@@ -372,7 +372,10 @@ export function renderFittingMatrix() {
             bodyHtml = itemNames.map(itemName => {
                 let rowHtml = `<tr style="border-bottom:1px solid #e2e8f0;">
                     <td class="item-name" style="padding:18px 16px;">
-                        <span style="display: inline-block; background: #475569; color: white; padding: 6px 14px; border-radius: 9999px; font-size: 13px; font-weight: 500; line-height: 1.4;">${itemName}</span>
+                        <div style="display:flex; align-items:center;">
+                            <span style="display: inline-block; background: #475569; color: white; padding: 6px 14px; border-radius: 9999px; font-size: 13px; font-weight: 500; line-height: 1.4;">${itemName}</span>
+                            <i data-lucide="edit-2" class="cursor-pointer admin-only" style="margin-left: 10px; color: #0f172a; opacity:0.8; cursor:pointer;" size="14" onclick="window.editFittingItem('${itemName.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', '${currentFittingTab.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')" title="Edit Item Name"></i>
+                        </div>
                     </td>`;
                 
                 for (let size of sizes) {
@@ -387,7 +390,11 @@ export function renderFittingMatrix() {
                     </td>`;
                 }
                 
-                rowHtml += `<td class="admin-only"></td></tr>`;
+                rowHtml += `<td class="admin-only" style="padding:18px 16px; text-align:center;">
+                    <button class="glass-btn" style="padding:4px;color:var(--danger);background:rgba(239,68,68,0.05);margin:0 auto;" title="Delete Row" onclick="window.deleteFittingItem('${itemName.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', '${currentFittingTab.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')">
+                        <i data-lucide="trash-2" size="14"></i>
+                    </button>
+                </td></tr>`;
                 return rowHtml;
             }).join('');
         }
@@ -409,7 +416,7 @@ export function renderFittingMatrix() {
 window.setFittingTab = async function(tab) {
     currentFittingTab = tab;
     try {
-        const { fetchPipeColumns } = await import('./api.js?v=1.0.8');
+        const { fetchPipeColumns } = await import('./api.js?v=1.0.9');
         const columns = await fetchPipeColumns(tab);
         state.fittingColumns.splice(0, state.fittingColumns.length, ...columns);
     } catch (err) {
