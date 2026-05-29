@@ -1,6 +1,6 @@
-import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.1.6';
-import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.1.6';
-import { state } from './state.js?v=1.1.6';
+import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.1.7';
+import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.1.7';
+import { state } from './state.js?v=1.1.7';
 
 // ──────────────────────────────────────────
 // INIT
@@ -38,8 +38,8 @@ async function loadAllData() {
             .filter(c => c.type === 'supreme' && c.active)
             .sort((a, b) => (a.order || 0) - (b.order || 0) || a.name.localeCompare(b.name));
         const tabs = activeCategories.length > 0
-            ? ['General', ...new Set(activeCategories.map(c => c.name))]
-            : [...new Set(products.filter(p => p.category === 'supreme').map(p => p.subCategory || 'General'))];
+            ? [...new Set(activeCategories.map(c => c.name))]
+            : [...new Set(products.filter(p => p.category === 'supreme').map(p => p.subCategory || 'General'))].filter(t => t !== 'General');
         const defaultTab = tabs[0] || 'General';
         window.currentPipeTab = defaultTab;
 
@@ -154,7 +154,7 @@ function updateProductSubcategoryOptions(category) {
     if (!select) return;
     const categories = state.pipeCategories.filter(c => c.type === category && c.active).sort((a, b) => (a.order || 0) - (b.order || 0));
     select.innerHTML = `
-        <option value="">General</option>
+        <option value="">Select Category</option>
         ${categories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('')}
     `;
 }

@@ -1,4 +1,4 @@
-import { state } from './state.js?v=1.1.6';
+import { state } from './state.js?v=1.1.7';
 
 export function initIcons() {
     if (window.lucide) {
@@ -174,8 +174,8 @@ function renderPipeDashboard() {
         .sort((a, b) => (a.order || 0) - (b.order || 0) || a.name.localeCompare(b.name));
 
     const tabs = activeCategories.length > 0
-        ? ['General', ...new Set(activeCategories.map(c => c.name))]
-        : [...new Set(products.map(getPipeType))];
+        ? [...new Set(activeCategories.map(c => c.name))]
+        : [...new Set(products.map(getPipeType))].filter(t => t !== 'General');
 
     if (!currentPipeTab || !tabs.includes(currentPipeTab)) {
         currentPipeTab = tabs[0];
@@ -281,7 +281,7 @@ function renderPipeDashboard() {
 window.setPipeTab = async function(tab) {
     currentPipeTab = tab;
     try {
-        const { fetchPipeColumns } = await import('./api.js?v=1.1.6');
+        const { fetchPipeColumns } = await import('./api.js?v=1.1.7');
         const columns = await fetchPipeColumns(tab);
         state.pipeColumns.splice(0, state.pipeColumns.length, ...columns);
     } catch (err) {
@@ -410,7 +410,7 @@ export function renderFittingMatrix() {
 window.setFittingTab = async function(tab) {
     currentFittingTab = tab;
     try {
-        const { fetchPipeColumns } = await import('./api.js?v=1.1.6');
+        const { fetchPipeColumns } = await import('./api.js?v=1.1.7');
         const columns = await fetchPipeColumns(tab);
         state.fittingColumns.splice(0, state.fittingColumns.length, ...columns);
     } catch (err) {
