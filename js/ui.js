@@ -1,4 +1,4 @@
-import { state } from './state.js?v=1.0.7';
+import { state } from './state.js?v=1.0.8';
 
 export function initIcons() {
     if (window.lucide) {
@@ -287,7 +287,7 @@ function renderPipeDashboard() {
 window.setPipeTab = async function(tab) {
     currentPipeTab = tab;
     try {
-        const { fetchPipeColumns } = await import('./api.js?v=1.0.7');
+        const { fetchPipeColumns } = await import('./api.js?v=1.0.8');
         const columns = await fetchPipeColumns(tab);
         state.pipeColumns.splice(0, state.pipeColumns.length, ...columns);
     } catch (err) {
@@ -409,7 +409,7 @@ export function renderFittingMatrix() {
 window.setFittingTab = async function(tab) {
     currentFittingTab = tab;
     try {
-        const { fetchPipeColumns } = await import('./api.js?v=1.0.7');
+        const { fetchPipeColumns } = await import('./api.js?v=1.0.8');
         const columns = await fetchPipeColumns(tab);
         state.fittingColumns.splice(0, state.fittingColumns.length, ...columns);
     } catch (err) {

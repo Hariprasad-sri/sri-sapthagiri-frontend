@@ -1,6 +1,6 @@
-import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.0.7';
-import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.0.7';
-import { state } from './state.js?v=1.0.7';
+import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.0.8';
+import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.0.8';
+import { state } from './state.js?v=1.0.8';
 
 // ──────────────────────────────────────────
 // INIT
@@ -648,6 +648,8 @@ function setupEventListeners() {
                 category,
                 name,
                 model: size !== '—' ? size : '',
+                size: size !== '—' ? size : '',
+                material: subCategory,
                 subCategory,
                 stock: newStock,
                 lowStockLimit: 10,
@@ -684,7 +686,7 @@ function setupEventListeners() {
                 } else {
                     newName += ` ${newSize}`;
                 }
-                await updateProduct(p._id || p.id, { specs, model: newSize, name: newName });
+                await updateProduct(p._id || p.id, { specs, model: newSize, size: newSize, name: newName });
             }
             await loadAllData();
         } catch (err) {
@@ -753,7 +755,7 @@ function setupEventListeners() {
                 } else {
                     newName += ` ${newSize}`;
                 }
-                await updateProduct(p._id || p.id, { specs, model: newSize, name: newName });
+                await updateProduct(p._id || p.id, { specs, model: newSize, size: newSize, name: newName });
             }
             await loadAllData();
         } catch (err) {
@@ -2296,17 +2298,20 @@ function printInlineStockReport() {
         <head>
             <title>Complete Stock Level Report</title>
             <style>
-                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #333; }
-                h2 { color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px; margin-bottom: 20px; }
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #333; font-size: 16px; }
+                h2 { color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px; margin-bottom: 20px; font-size: 26px !important; }
                 table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-                th, td { border: 1px solid #ddd; padding: 12px 10px; text-align: left; }
-                th { background-color: #f3f4f6; font-weight: bold; }
+                th, td { border: 1px solid #ddd; padding: 12px 10px; text-align: left; font-size: 15px !important; }
+                th { background-color: #f3f4f6; font-weight: bold; font-size: 15px !important; }
                 tr:nth-child(even) { background-color: #f9fafb; }
-                .badge { display: inline-block; padding: 3px 8px; font-size: 11px; font-weight: bold; border-radius: 4px; text-transform: uppercase; }
+                .brand-badge { display: inline-block; padding: 4px 10px; font-size: 12px !important; font-weight: bold; border-radius: 4px; text-transform: uppercase; }
+                .badge { display: inline-block; padding: 4px 10px; font-size: 12px !important; font-weight: bold; border-radius: 4px; text-transform: uppercase; }
                 .badge-cri { background: #fee2e2; color: #991b1b; }
                 .badge-supreme { background: #dbeafe; color: #1e40af; }
                 .badge-fitting { background: #dcfce7; color: #166534; }
-                .breakdown-pill { display: inline-block; padding: 2px 6px; font-size: 11px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 4px; margin-right: 4px; margin-bottom: 4px; }
+                .breakdown-pill { display: inline-block; padding: 3px 8px; font-size: 13px !important; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 4px; margin-right: 4px; margin-bottom: 4px; }
+                .status-pill { font-size: 13px !important; padding: 4px 8px !important; }
+                td:last-child { font-size: 17px !important; }
             </style>
         </head>
         <body onload="window.print(); window.close();">
