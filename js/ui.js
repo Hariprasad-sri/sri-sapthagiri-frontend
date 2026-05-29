@@ -1,4 +1,4 @@
-import { state } from './state.js?v=1.0.9';
+import { state } from './state.js?v=1.1.0';
 
 export function initIcons() {
     if (window.lucide) {
@@ -287,7 +287,7 @@ function renderPipeDashboard() {
 window.setPipeTab = async function(tab) {
     currentPipeTab = tab;
     try {
-        const { fetchPipeColumns } = await import('./api.js?v=1.0.9');
+        const { fetchPipeColumns } = await import('./api.js?v=1.1.0');
         const columns = await fetchPipeColumns(tab);
         state.pipeColumns.splice(0, state.pipeColumns.length, ...columns);
     } catch (err) {
@@ -416,7 +416,7 @@ export function renderFittingMatrix() {
 window.setFittingTab = async function(tab) {
     currentFittingTab = tab;
     try {
-        const { fetchPipeColumns } = await import('./api.js?v=1.0.9');
+        const { fetchPipeColumns } = await import('./api.js?v=1.1.0');
         const columns = await fetchPipeColumns(tab);
         state.fittingColumns.splice(0, state.fittingColumns.length, ...columns);
     } catch (err) {
@@ -461,11 +461,12 @@ export function renderInventory(category) {
                 <div class="glass product-card" style="padding: 24px; border-radius: 12px; margin-bottom: 24px; background: white;">
                     <!-- HEADER -->
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px;">
-                        <div style="display:flex; align-items:center; gap: 12px;">
+                        <div style="display:flex; align-items:center; gap: 12px; flex-wrap: wrap;">
                             <i data-lucide="zap" style="color:#0f172a;" size="20"></i>
-                            <strong style="font-size: 16px; color:#0f172a;">${name}</strong>
+                            <strong style="font-size: 16px; color:#0f172a;">${name}${hp ? ` - ${hp} HP` : ''}${phase ? ` - ${phase}` : ''}${type && type !== name ? ` (${type})` : ''}</strong>
+                            ${hp ? `<span class="pill" style="background:#10b981; color:white; font-size:11px; font-weight:600; padding:4px 10px; border-radius:12px;">${hp} HP</span>` : ''}
                             ${phase ? `<span class="pill" style="background:#3b82f6; color:white; font-size:11px; font-weight:600; padding:4px 10px; border-radius:12px;">${phase}</span>` : ''}
-                            ${type ? `<span class="pill" style="background:#f1f5f9; color:#475569; font-size:11px; font-weight:600; padding:4px 10px; border-radius:12px; border: 1px solid #cbd5e1;">${type}</span>` : ''}
+                            ${type && type !== name ? `<span class="pill" style="background:#f1f5f9; color:#475569; font-size:11px; font-weight:600; padding:4px 10px; border-radius:12px; border: 1px solid #cbd5e1;">${type}</span>` : ''}
                         </div>
                         <div style="font-weight: 700; color:#0f172a; font-size:14px;">Total Qty: ${qty}</div>
                     </div>
