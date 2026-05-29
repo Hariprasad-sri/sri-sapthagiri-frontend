@@ -1,4 +1,4 @@
-import { state } from './state.js';
+import { state } from './state.js?v=1.0.3';
 
 export function initIcons() {
     if (window.lucide) {
@@ -118,6 +118,18 @@ function renderItemsSummary(items) {
 
 let currentFittingTab = '';
 let currentPipeTab = '';
+
+Object.defineProperty(window, 'currentFittingTab', {
+    get() { return currentFittingTab; },
+    set(val) { currentFittingTab = val; },
+    configurable: true
+});
+
+Object.defineProperty(window, 'currentPipeTab', {
+    get() { return currentPipeTab; },
+    set(val) { currentPipeTab = val; },
+    configurable: true
+});
 
 function getPipeType(product) {
     const material = (product.specs?.material || product.material || '').toString().trim();

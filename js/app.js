@@ -1,6 +1,6 @@
-import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js';
-import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js';
-import { state } from './state.js';
+import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.0.3';
+import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.0.3';
+import { state } from './state.js?v=1.0.3';
 
 // ──────────────────────────────────────────
 // INIT
@@ -195,11 +195,11 @@ async function openManagePipeCategoriesModal(type = 'supreme') {
 }
 
 window.openManageSizesModal = async function(type) {
-    if (type === 'pipe' && currentPipeTab === 'General') {
+    if (type === 'pipe') {
         return openEditPipeColumnsModal();
     }
 
-    const tab = type === 'pipe' ? currentPipeTab : currentFittingTab;
+    const tab = type === 'pipe' ? window.currentPipeTab : window.currentFittingTab;
     document.getElementById('manage-sizes-title').textContent = `Manage Columns for ${tab}`;
     document.getElementById('new-manage-size-name').value = '';
     
