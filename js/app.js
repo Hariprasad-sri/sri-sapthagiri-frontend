@@ -1,6 +1,6 @@
-import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.1.12';
-import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.1.12';
-import { state } from './state.js?v=1.1.12';
+import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.1.13';
+import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.1.13';
+import { state } from './state.js?v=1.1.13';
 
 // ──────────────────────────────────────────
 // INIT
@@ -218,11 +218,37 @@ function openNewPipeCategoryModal(type = 'supreme') {
 async function openManagePipeCategoriesModal(type = 'supreme') {
     window.currentManageCategoryType = type;
     const titleEl = document.getElementById('manage-categories-modal-title');
+    const labelEl = document.getElementById('new-category-input-label');
+    const inputEl = document.getElementById('new-manage-category-name');
     if (titleEl) {
         titleEl.textContent = type === 'supreme' ? 'Manage Pipe Categories' : 'Manage Fitting Categories';
     }
+    if (labelEl) {
+        labelEl.textContent = type === 'supreme' ? 'Add New Pipe Category' : 'Add New Fitting Category';
+    }
+    if (inputEl) {
+        inputEl.placeholder = type === 'supreme' ? 'e.g. PVC pipes' : 'e.g. GI fittings';
+        inputEl.value = '';
+    }
     await refreshPipeCategories();
     document.getElementById('pipe-categories-modal').style.display = 'flex';
+}
+
+async function submitNewCategoryFromManageModal() {
+    const input = document.getElementById('new-manage-category-name');
+    const name = input?.value.trim();
+    const type = window.currentManageCategoryType || 'supreme';
+    if (!name) return alert('Category name is required.');
+    try {
+        await createPipeCategory(name, type);
+        if (input) input.value = '';
+        await refreshPipeCategories();
+        updateProductSubcategoryOptions(type);
+        renderAll();
+    } catch (err) {
+        console.error('Could not create category:', err);
+        alert('Error creating category: ' + err.message);
+    }
 }
 
 window.openManageSizesModal = async function(type) {
@@ -528,6 +554,7 @@ function setupEventListeners() {
     window.openLocationManager = openLocationManager;
     window.addLocation = addLocation;
     window.deleteLocation = deleteLocation;
+    window.submitNewCategoryFromManageModal = submitNewCategoryFromManageModal;
     window.selectGodown = (locationName) => {
         window.selectedGodownFilter = locationName;
         window.closeModal('location-manager-modal');
@@ -2219,9 +2246,14 @@ function renderLocationList() {
     html += state.locations.map(loc => {
         const isSelected = activeFilter === loc.name;
         return `
-            <div class="flex justify-between items-center glass-row cursor-pointer" style="padding:12px 16px; border:1px solid ${isSelected ? '#2563eb' : 'var(--border-light)'}; border-radius:12px; background:${isSelected ? 'rgba(37,99,235,0.08)' : 'rgba(255,255,255,0.4)'}; margin-bottom:4px;" onclick="window.selectGodown('${loc.name.replace(/'/g, "\\'")}')">
-                <span style="font-weight:600; color:${isSelected ? '#2563eb' : 'inherit'};">${loc.name}</span>
-                ${isSelected ? '<i data-lucide="check" size="16" style="color:#2563eb;"></i>' : '<i data-lucide="chevron-right" size="16" style="color:var(--text-muted);"></i>'}
+            <div class="flex justify-between items-center glass-row" style="padding:12px 16px; border:1px solid ${isSelected ? '#2563eb' : 'var(--border-light)'}; border-radius:12px; background:${isSelected ? 'rgba(37,99,235,0.08)' : 'rgba(255,255,255,0.4)'}; margin-bottom:4px; gap: 8px;">
+                <div class="flex justify-between items-center cursor-pointer" style="flex: 1;" onclick="window.selectGodown('${loc.name.replace(/'/g, "\\'")}')">
+                    <span style="font-weight:600; color:${isSelected ? '#2563eb' : 'inherit'};">${loc.name}</span>
+                    ${isSelected ? '<i data-lucide="check" size="16" style="color:#2563eb;"></i>' : '<i data-lucide="chevron-right" size="16" style="color:var(--text-muted);"></i>'}
+                </div>
+                <button type="button" onclick="window.deleteLocation('${loc.name.replace(/'/g, "\\'")}')" style="background: #ffffff; border: 1px solid #ef4444; color: #ef4444; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; flex-shrink: 0;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#ffffff'">
+                    <i data-lucide="trash-2" size="16"></i>
+                </button>
             </div>
         `;
     }).join('');
