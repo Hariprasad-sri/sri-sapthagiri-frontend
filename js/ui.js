@@ -1,4 +1,4 @@
-import { state } from './state.js?v=1.1.8';
+import { state } from './state.js?v=1.1.9';
 
 export function initIcons() {
     if (window.lucide) {
@@ -281,7 +281,7 @@ function renderPipeDashboard() {
 window.setPipeTab = async function(tab) {
     currentPipeTab = tab;
     try {
-        const { fetchPipeColumns } = await import('./api.js?v=1.1.8');
+        const { fetchPipeColumns } = await import('./api.js?v=1.1.9');
         const columns = await fetchPipeColumns(tab);
         state.pipeColumns.splice(0, state.pipeColumns.length, ...columns);
     } catch (err) {
@@ -410,7 +410,7 @@ export function renderFittingMatrix() {
 window.setFittingTab = async function(tab) {
     currentFittingTab = tab;
     try {
-        const { fetchPipeColumns } = await import('./api.js?v=1.1.8');
+        const { fetchPipeColumns } = await import('./api.js?v=1.1.9');
         const columns = await fetchPipeColumns(tab);
         state.fittingColumns.splice(0, state.fittingColumns.length, ...columns);
     } catch (err) {
@@ -490,6 +490,7 @@ export function renderInventory(category) {
                             <button class="glass-btn admin-only" data-action="add-stock" data-id="${getId(p)}" style="justify-content:center; border: 1px solid #93c5fd; color:#2563eb; background:white; font-weight:600; padding: 8px 10px; border-radius: 20px;">Add Serials</button>
                             <button class="glass-btn admin-only" data-action="prompt-delete-serial" data-id="${getId(p)}" style="justify-content:center; border: 1px solid #fca5a5; color:#ef4444; background:white; font-weight:600; padding: 8px 10px; border-radius: 20px;">Remove Serial</button>
                             <button class="glass-btn admin-only" data-action="edit" data-id="${getId(p)}" data-category="${category}" style="justify-content:center; border: 1px solid #93c5fd; color:#2563eb; background:white; font-weight:600; padding: 8px 10px; border-radius: 20px;">Edit Motor</button>
+                            <button class="glass-btn admin-only" data-action="delete" data-id="${getId(p)}" style="justify-content:center; border: 1px solid #fca5a5; color:#ef4444; background:white; font-weight:600; padding: 8px 10px; border-radius: 20px;">Delete Motor</button>
                         </div>
                     </div>
                 </div>
