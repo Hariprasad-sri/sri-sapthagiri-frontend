@@ -1,4 +1,4 @@
-import { state } from './state.js?v=1.1.3';
+import { state } from './state.js?v=1.1.4';
 
 export function initIcons() {
     if (window.lucide) {
@@ -189,14 +189,14 @@ function renderPipeDashboard() {
     }
 
     const isGeneral = true; // Every category now renders as a matrix!
-    const headerRow = [`<th style="text-align:left; padding:18px 16px; color:#64748b; font-size:13px; font-weight:700; letter-spacing:0.5px;">PIPE TYPE</th>`, `<th style="text-align:left; padding:18px 16px; color:#64748b; font-size:13px; font-weight:700; letter-spacing:0.5px;">PIPE SIZE</th>`, ...columns.map(col => `<th style="padding:18px 16px; color:#64748b; font-size:13px; font-weight:700; letter-spacing:0.5px; text-align:center;">${col}</th>`), `<th style="padding:18px 16px; width:80px; text-align:center;"></th>`].join('');
+    const headerRow = [`<th style="text-align:left; padding:18px 16px; color:#64748b; font-size:13px; font-weight:700; letter-spacing:0.5px;">SIZE</th>`, ...columns.map(col => `<th style="padding:18px 16px; color:#64748b; font-size:13px; font-weight:700; letter-spacing:0.5px; text-align:center;">${col}</th>`), `<th style="padding:18px 16px; width:80px; text-align:center;"></th>`].join('');
 
     const header = document.querySelector('.pipe-dashboard-table thead');
     if (header) header.innerHTML = `<tr>${headerRow}</tr>`;
 
     if (tabs.length === 0) {
         document.getElementById('pipe-tabs-container').innerHTML = '';
-        document.getElementById('pipe-dashboard-body').innerHTML = `<tr><td colspan="${isGeneral ? 3 + columns.length : 3}" style="padding:24px; text-align:center; color:var(--text-muted);">No pipe records found.</td></tr>`;
+        document.getElementById('pipe-dashboard-body').innerHTML = `<tr><td colspan="${isGeneral ? 2 + columns.length : 2}" style="padding:24px; text-align:center; color:var(--text-muted);">No pipe records found.</td></tr>`;
         return;
     }
 
@@ -224,9 +224,6 @@ function renderPipeDashboard() {
 
             return `
                 <tr style="border-bottom:1px solid #e2e8f0;">
-                    <td style="padding:18px 16px;">
-                        <span style="display: inline-block; background: #475569; color: white; padding: 6px 14px; border-radius: 9999px; font-size: 13px; font-weight: 500; line-height: 1.4;">${pipeType}</span>
-                    </td>
                     <td style="padding:18px 16px; color:#0f172a; font-weight:700; font-size:15px;">
                         <div style="display:flex; align-items:center;">
                             ${size} <i data-lucide="edit-2" class="cursor-pointer admin-only" style="margin-left: 10px; color: #0f172a; opacity:0.8;" size="14" onclick="window.editPipeSize('${size.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', '${pipeType.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')" title="Edit Size"></i>
@@ -249,9 +246,6 @@ function renderPipeDashboard() {
             const stockVal = p.stock || 0;
             return `
                 <tr style="border-bottom:1px solid #e2e8f0;">
-                    <td style="padding:18px 16px;">
-                        <span style="display: inline-block; background: #475569; color: white; padding: 6px 14px; border-radius: 9999px; font-size: 13px; font-weight: 500; line-height: 1.4;">${pipeType}</span>
-                    </td>
                     <td style="padding:18px 16px; color:#0f172a; font-weight:700; font-size:15px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <div style="display:flex; align-items:center;">
@@ -279,7 +273,7 @@ function renderPipeDashboard() {
 
     const body = document.getElementById('pipe-dashboard-body');
     if (body) {
-        body.innerHTML = rows.join('') || `<tr><td colspan="${isGeneral ? 3 + columns.length : 3}" style="padding:24px; text-align:center; color:var(--text-muted);">No pipe items exist for ${currentPipeTab}.</td></tr>`;
+        body.innerHTML = rows.join('') || `<tr><td colspan="${isGeneral ? 2 + columns.length : 2}" style="padding:24px; text-align:center; color:var(--text-muted);">No pipe items exist for ${currentPipeTab}.</td></tr>`;
     }
     initIcons();
 }
@@ -287,7 +281,7 @@ function renderPipeDashboard() {
 window.setPipeTab = async function(tab) {
     currentPipeTab = tab;
     try {
-        const { fetchPipeColumns } = await import('./api.js?v=1.1.3');
+        const { fetchPipeColumns } = await import('./api.js?v=1.1.4');
         const columns = await fetchPipeColumns(tab);
         state.pipeColumns.splice(0, state.pipeColumns.length, ...columns);
     } catch (err) {
@@ -416,7 +410,7 @@ export function renderFittingMatrix() {
 window.setFittingTab = async function(tab) {
     currentFittingTab = tab;
     try {
-        const { fetchPipeColumns } = await import('./api.js?v=1.1.3');
+        const { fetchPipeColumns } = await import('./api.js?v=1.1.4');
         const columns = await fetchPipeColumns(tab);
         state.fittingColumns.splice(0, state.fittingColumns.length, ...columns);
     } catch (err) {
