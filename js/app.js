@@ -1,6 +1,6 @@
-import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.1.14';
-import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.1.14';
-import { state } from './state.js?v=1.1.14';
+import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.1.15';
+import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.1.15';
+import { state } from './state.js?v=1.1.15';
 
 // ──────────────────────────────────────────
 // INIT
@@ -630,14 +630,51 @@ function setupEventListeners() {
             : 'Main Godown';
 
         if (ctx.id) {
-            try {
-                await addStock(ctx.id, addQty, [], location);
-                await loadAllData();
-                renderAll();
-            } catch (err) {
-                console.error('Could not update stock:', err);
-                alert('Could not update stock: ' + err.message);
+            const product = state.products.find(p => (p._id || p.id) === ctx.id);
+            if (!product) {
+                alert('Product not found in local state');
+                return;
             }
+
+            const originalStock = product.stock;
+            const originalUnits = [...product.units.map(u => ({ ...u }))];
+
+            // Optimistic update
+            product.stock += addQty;
+            if (addQty > 0) {
+                for (let i = 0; i < addQty; i++) {
+                    product.units.push({
+                        status: 'available',
+                        location: location
+                    });
+                }
+            } else if (addQty < 0) {
+                const toRemove = Math.abs(addQty);
+                let removed = 0;
+                for (let i = product.units.length - 1; i >= 0 && removed < toRemove; i--) {
+                    const u = product.units[i];
+                    if (u.status === 'available' && u.location === location) {
+                        product.units.splice(i, 1);
+                        removed++;
+                    }
+                }
+            }
+
+            renderAll();
+
+            addStock(ctx.id, addQty, [], location)
+                .then(async (updatedProduct) => {
+                    Object.assign(product, updatedProduct);
+                    await loadAllData();
+                    renderAll();
+                })
+                .catch((err) => {
+                    console.error('Could not update stock on server:', err);
+                    alert('Could not update stock: ' + err.message);
+                    product.stock = originalStock;
+                    product.units = originalUnits;
+                    renderAll();
+                });
         } else {
             if (addQty < 0) {
                 alert('Stock cannot be less than 0');
@@ -672,14 +709,24 @@ function setupEventListeners() {
         if (id) {
             const product = state.products.find(p => (p._id || p.id) === id);
             if (product) {
+                const originalStock = product.stock;
                 product.stock = newStock;
                 if (element) element.value = newStock;
-                try {
-                    await updateProduct(id, { stock: newStock });
-                } catch (err) {
-                    console.error('Could not update stock:', err);
-                    alert('Could not update stock.');
-                }
+                renderAll();
+
+                updateProduct(id, { stock: newStock })
+                    .then(async (updatedProduct) => {
+                        Object.assign(product, updatedProduct);
+                        await loadAllData();
+                        renderAll();
+                    })
+                    .catch((err) => {
+                        console.error('Could not update stock:', err);
+                        alert('Could not update stock: ' + err.message);
+                        product.stock = originalStock;
+                        if (element) element.value = originalStock;
+                        renderAll();
+                    });
             }
         } else {
             // Allow creating 0 stock products for UI scaffolding
@@ -711,13 +758,36 @@ function setupEventListeners() {
                 location
             };
 
-            try {
-                await createProduct(newProduct);
-                await loadAllData();
-            } catch (e) {
-                console.error(e);
-                alert('Failed to create product');
-            }
+            const tempId = 'temp-' + Date.now();
+            const tempProduct = {
+                _id: tempId,
+                ...newProduct,
+                units: Array(newStock).fill(0).map(() => ({
+                    status: 'available',
+                    location: location
+                }))
+            };
+            state.products.push(tempProduct);
+            renderAll();
+
+            createProduct(newProduct)
+                .then(async (created) => {
+                    const idx = state.products.findIndex(p => p._id === tempId);
+                    if (idx !== -1) {
+                        state.products[idx] = created;
+                    }
+                    await loadAllData();
+                    renderAll();
+                })
+                .catch((err) => {
+                    console.error('Failed to create product:', err);
+                    alert('Failed to create product: ' + err.message);
+                    const idx = state.products.findIndex(p => p._id === tempId);
+                    if (idx !== -1) {
+                        state.products.splice(idx, 1);
+                    }
+                    renderAll();
+                });
         }
     };
 
