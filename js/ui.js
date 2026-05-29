@@ -352,6 +352,8 @@ export function renderFittingMatrix() {
     
     const itemNames = [...new Set(tabProducts.map(getItemName))].sort();
     
+    const thead = document.getElementById('fitting-matrix-head');
+    if (thead) {
         thead.innerHTML = `
             <tr>
                 <th style="min-width: 150px; padding:18px 16px; color:#64748b; font-size:13px; font-weight:700; letter-spacing:0.5px; text-align:left;">ITEM NAME</th>
