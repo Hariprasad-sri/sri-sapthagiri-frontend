@@ -18,7 +18,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <!-- App Logic -->
-    <script type="module" src="js/app.js?v=1.1.7"></script>
+    <script type="module" src="js/app.js?v=1.1.8"></script>
 </head>
 
 <body>
@@ -796,9 +796,10 @@
 
                 <div id="motor-fields" style="display:none;">
                     <div class="form-group">
-                        <label>HP (Horsepower) <span style="color:var(--danger)">*</span></label>
-                        <input type="text" id="prod-hp" class="form-control" placeholder="e.g. 1.5">
-                        <span class="field-error" id="err-hp"></span>
+                        <label>Motor Name <span style="color:var(--danger)">*</span></label>
+                        <input type="text" id="prod-type" class="form-control"
+                            placeholder="e.g. V4 Submersible, Monobloc">
+                        <span class="field-error" id="err-type"></span>
                     </div>
                     <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
                         <div>
@@ -810,10 +811,9 @@
                             <span class="field-error" id="err-phase"></span>
                         </div>
                         <div>
-                            <label>Motor Name <span style="color:var(--danger)">*</span></label>
-                            <input type="text" id="prod-type" class="form-control"
-                                placeholder="e.g. V4 Submersible, Monobloc">
-                            <span class="field-error" id="err-type"></span>
+                            <label>HP (Horsepower) <span style="color:var(--danger)">*</span></label>
+                            <input type="text" id="prod-hp" class="form-control" placeholder="e.g. 1.5">
+                            <span class="field-error" id="err-hp"></span>
                         </div>
                     </div>
                 </div>
