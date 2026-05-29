@@ -1,6 +1,6 @@
-import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.1.2';
-import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.1.2';
-import { state } from './state.js?v=1.1.2';
+import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.1.3';
+import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.1.3';
+import { state } from './state.js?v=1.1.3';
 
 // ──────────────────────────────────────────
 // INIT
@@ -1949,6 +1949,9 @@ function printChallan(id) {
     const printWindow = window.open('', '_blank');
     const items = req.items || [{ category: req.category, productName: req.productName, qty: req.qty }];
 
+    const hasCri = items.some(item => item.category === 'cri');
+    const hasSupreme = items.some(item => item.category === 'supreme' || item.category === 'fitting');
+
     printWindow.document.write(`
         <html><head><title>Transport Challan #${req._id || req.id}</title>
         <style>
@@ -1978,6 +1981,20 @@ function printChallan(id) {
             .sign-box { border-top: 1px solid #000; padding-top: 4px; width: 30mm; text-align: center; }
         </style></head><body>
         <div class="shop-header">
+            ${(hasCri || hasSupreme) ? `
+            <div class="logo-header" style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 8px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                ${hasCri ? `
+                <svg viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg" style="width: 24px; height: 30px; display: inline-block;">
+                    <ellipse cx="60" cy="75" rx="55" ry="70" stroke="#d71920" stroke-width="5" fill="#fff" />
+                    <ellipse cx="60" cy="75" rx="50" ry="65" stroke="#d71920" stroke-width="2" fill="none" />
+                    <text x="60" y="96" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="52" fill="#fff" stroke="#d71920" stroke-width="3" text-anchor="middle" style="letter-spacing: -2px; transform: scaleY(1.4); transform-origin: 60px 75px;">CRI</text>
+                </svg>
+                ` : ''}
+                ${hasSupreme ? `
+                <div style="background: #d71920; color: white; font-family: 'Arial Black', Impact, sans-serif; font-style: italic; font-weight: 900; font-size: 10px; padding: 2px 5px; border-radius: 2px; letter-spacing: -0.3px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; height: 16px; text-transform: none; box-sizing: border-box; border: 1px solid #d71920;">Supreme</div>
+                ` : ''}
+            </div>
+            ` : ''}
             <div class="shop-name">SRI SAPTHAGIRI ELECTRICAL &amp; H/W</div>
             <div class="shop-info">
                 123, Nethaji Road, TIRUPATI-517501.<br>
@@ -2321,6 +2338,14 @@ function printInlineStockReport() {
             </style>
         </head>
         <body onload="window.print(); window.close();">
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 15px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                <svg viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg" style="width: 32px; height: 40px; display: inline-block;">
+                    <ellipse cx="60" cy="75" rx="55" ry="70" stroke="#d71920" stroke-width="5" fill="#fff" />
+                    <ellipse cx="60" cy="75" rx="50" ry="65" stroke="#d71920" stroke-width="2" fill="none" />
+                    <text x="60" y="96" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="52" fill="#fff" stroke="#d71920" stroke-width="3" text-anchor="middle" style="letter-spacing: -2px; transform: scaleY(1.4); transform-origin: 60px 75px;">CRI</text>
+                </svg>
+                <div style="background: #d71920; color: white; font-family: 'Arial Black', Impact, sans-serif; font-style: italic; font-weight: 900; font-size: 13px; padding: 4px 8px; border-radius: 3px; letter-spacing: -0.4px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; height: 22px; text-transform: none; box-sizing: border-box; border: 1px solid #d71920;">Supreme</div>
+            </div>
             <h2>Sri Sapthagiri Systems - Complete Stock Level Report</h2>
             <div style="font-size: 13px; color: #666; margin-bottom: 20px;">Generated on: ${new Date().toLocaleString()}</div>
             ${reportHtml}
