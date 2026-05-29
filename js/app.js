@@ -1,6 +1,6 @@
-import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.0.6';
-import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.0.6';
-import { state } from './state.js?v=1.0.6';
+import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.0.7';
+import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.0.7';
+import { state } from './state.js?v=1.0.7';
 
 // ──────────────────────────────────────────
 // INIT
@@ -247,7 +247,7 @@ async function openEditPipeColumnsModal() {
 async function openEditFittingColumnsModal() {
     window._activeColumnEditType = 'fitting';
     const titleEl = document.getElementById('pipe-columns-modal-title');
-    if (titleEl) titleEl.textContent = `Edit Sizes for ${window.currentFittingTab || 'PVC FITTINGS'}`;
+    if (titleEl) titleEl.textContent = `Edit Columns for ${window.currentFittingTab || 'PVC FITTINGS'}`;
     const inputEl = document.getElementById('new-pipe-column-name');
     if (inputEl) inputEl.placeholder = 'e.g. 2" or 3"';
     await refreshFittingColumns();
