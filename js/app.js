@@ -1,6 +1,6 @@
-import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.1.11';
-import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.1.11';
-import { state } from './state.js?v=1.1.11';
+import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.1.12';
+import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.1.12';
+import { state } from './state.js?v=1.1.12';
 
 // ──────────────────────────────────────────
 // INIT
@@ -589,25 +589,43 @@ function setupEventListeners() {
     window.submitMatrixAddStock = async () => {
         if (!currentMatrixUpdateContext) return;
         const addQty = parseInt(document.getElementById('matrix-add-qty').value) || 0;
-        const newStock = currentMatrixUpdateContext.currentStock + addQty;
 
-        if (newStock < 0) {
-            alert('Stock cannot be less than 0');
+        if (addQty === 0) {
+            window.closeModal('matrix-add-stock-modal');
             return;
         }
 
         const ctx = currentMatrixUpdateContext;
         window.closeModal('matrix-add-stock-modal');
 
-        await window.setMatrixStock(
-            ctx.id,
-            ctx.category,
-            ctx.subCategory,
-            ctx.size,
-            ctx.weight,
-            newStock,
-            ctx.element
-        );
+        const location = (window.selectedGodownFilter && window.selectedGodownFilter !== 'all')
+            ? window.selectedGodownFilter
+            : 'Main Godown';
+
+        if (ctx.id) {
+            try {
+                await addStock(ctx.id, addQty, [], location);
+                await loadAllData();
+                renderAll();
+            } catch (err) {
+                console.error('Could not update stock:', err);
+                alert('Could not update stock: ' + err.message);
+            }
+        } else {
+            if (addQty < 0) {
+                alert('Stock cannot be less than 0');
+                return;
+            }
+            await window.setMatrixStock(
+                null,
+                ctx.category,
+                ctx.subCategory,
+                ctx.size,
+                ctx.weight,
+                addQty,
+                ctx.element
+            );
+        }
     };
 
     window.setMatrixStock = async (id, category, subCategory, size, weight, value, element) => {
@@ -649,6 +667,10 @@ function setupEventListeners() {
                 if (size && size !== '—') name += ` ${size}`;
             }
 
+            const location = (window.selectedGodownFilter && window.selectedGodownFilter !== 'all')
+                ? window.selectedGodownFilter
+                : 'Main Godown';
+
             const newProduct = {
                 category,
                 name,
@@ -658,7 +680,8 @@ function setupEventListeners() {
                 subCategory,
                 stock: newStock,
                 lowStockLimit: 10,
-                specs: { size, material: subCategory }
+                specs: { size, material: subCategory },
+                location
             };
 
             try {
@@ -1287,6 +1310,11 @@ function openStockModal(id) {
 
     document.getElementById('stock-form').reset();
     document.getElementById('stock-serials').value = '';
+
+    if (window.selectedGodownFilter && window.selectedGodownFilter !== 'all') {
+        const stockLocSelect = document.getElementById('stock-location');
+        if (stockLocSelect) stockLocSelect.value = window.selectedGodownFilter;
+    }
 
     const nameContainer = document.getElementById('stock-modal-prod-name-container');
     const selectContainer = document.getElementById('stock-modal-prod-select-container');
