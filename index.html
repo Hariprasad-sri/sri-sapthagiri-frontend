@@ -18,7 +18,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <!-- App Logic -->
-    <script type="module" src="js/app.js?v=1.1.1"></script>
+    <script type="module" src="js/app.js?v=1.1.2"></script>
 </head>
 
 <body>
@@ -1057,7 +1057,7 @@
                     onclick="addRequestItemRow()">
                     <i data-lucide="plus-circle"></i> Add Another Product
                 </button>
-                <div class="form-group">
+                <div class="form-group" id="req-source-group">
                     <label id="lbl-source-name">Source Godown</label>
                     <select id="req-source" class="form-control" onchange="refreshAllProductDropdowns()" required>
                         <option value="Main Godown">Main Godown</option>

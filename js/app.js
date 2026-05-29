@@ -1,6 +1,6 @@
-import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.1.1';
-import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.1.1';
-import { state } from './state.js?v=1.1.1';
+import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.1.2';
+import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.1.2';
+import { state } from './state.js?v=1.1.2';
 
 // ──────────────────────────────────────────
 // INIT
@@ -1600,7 +1600,7 @@ function toggleDestInput() {
     } else {
         label.textContent = isInternal ? 'TO (Store Name)' : 'Store Name';
         container.innerHTML = `
-            <input type="text" id="req-dest" class="form-control" placeholder="e.g. City Retail Branch" required>
+            <input type="text" id="req-dest" class="form-control" placeholder="e.g. City Retail Branch" ${isInternal ? 'required' : 'value="Customer"'}>
         `;
     }
 }
@@ -1633,21 +1633,27 @@ function openRequestModal(isInternal = false) {
     // Reset destination type and hide/show customer group
     const destTypeGroup = document.getElementById('req-dest-type-group');
     const customerGroup = document.getElementById('req-customer-group');
+    const sourceGroup = document.getElementById('req-source-group');
+    const destGrid = document.getElementById('req-dest-grid');
+
     if (isInternal) {
         document.getElementById('req-dest-type').value = 'godown';
         if (destTypeGroup) destTypeGroup.style.display = 'none';
         if (customerGroup) customerGroup.style.display = 'none';
-
-        // Adjust grid for single column if Dest Type is hidden
-        const destGrid = document.getElementById('req-dest-grid');
-        if (destGrid) destGrid.style.gridTemplateColumns = '1fr';
+        if (sourceGroup) sourceGroup.style.display = 'block';
+        if (destGrid) {
+            destGrid.style.display = 'grid';
+            destGrid.style.gridTemplateColumns = '1fr';
+        }
     } else {
         document.getElementById('req-dest-type').value = 'store';
         if (destTypeGroup) destTypeGroup.style.display = 'block';
         if (customerGroup) customerGroup.style.display = 'block';
-
-        const destGrid = document.getElementById('req-dest-grid');
-        if (destGrid) destGrid.style.gridTemplateColumns = '140px 1fr';
+        if (sourceGroup) sourceGroup.style.display = 'none';
+        if (destGrid) {
+            destGrid.style.display = 'none';
+            destGrid.style.gridTemplateColumns = '140px 1fr';
+        }
     }
     toggleDestInput();
 
