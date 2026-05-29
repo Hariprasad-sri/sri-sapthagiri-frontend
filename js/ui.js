@@ -145,21 +145,25 @@ function getPipeSize(product) {
     return product.specs?.size || product.size || product.model || '—';
 }
 
-function getPipeWeightColumn(product) {
+function getPipeWeightColumn(product, columns) {
     const name = (product.name || '').toUpperCase();
     const material = (product.specs?.material || '').toString().toUpperCase();
-    const weightCandidates = ['4KG', '6KG', '10KG', '15KG', 'SLOTTED'];
+    
+    // Use columns as active candidates
+    const weightCandidates = columns.map(c => c.toUpperCase());
     const matches = weightCandidates.find(col => name.includes(col) || material.includes(col));
-    if (matches) return matches;
-    if (name.includes('PVC')) return '4KG';
-    if (name.includes('GI')) return '6KG';
-    if (name.includes('SWR')) return '10KG';
-    if (name.includes('NU-DRAIN') || name.includes('NU DRAIN') || name.includes('DRAIN')) return '15KG';
-    if (name.includes('ECO-DRAIN') || name.includes('DWC') || name.includes('HDP') || name.includes('COLUMN')) return 'SLOTTED';
+    if (matches) return columns[weightCandidates.indexOf(matches)];
+    
+    // Fallbacks
+    if (name.includes('PVC')) return columns.includes('4KG') ? '4KG' : columns[0] || '';
+    if (name.includes('GI')) return columns.includes('6KG') ? '6KG' : columns[0] || '';
+    if (name.includes('SWR')) return columns.includes('10KG') ? '10KG' : columns[0] || '';
+    if (name.includes('NU-DRAIN') || name.includes('NU DRAIN') || name.includes('DRAIN')) return columns.includes('15KG') ? '15KG' : columns[0] || '';
+    if (name.includes('ECO-DRAIN') || name.includes('DWC') || name.includes('HDP') || name.includes('COLUMN')) return columns.includes('SLOTTED') ? 'SLOTTED' : columns[0] || '';
     const size = getPipeSize(product);
-    if (typeof size === 'string' && size.includes('4')) return '4KG';
-    if (typeof size === 'string' && size.includes('6')) return '6KG';
-    return 'SLOTTED';
+    if (typeof size === 'string' && size.includes('4')) return columns.includes('4KG') ? '4KG' : columns[0] || '';
+    if (typeof size === 'string' && size.includes('6')) return columns.includes('6KG') ? '6KG' : columns[0] || '';
+    return columns[0] || '';
 }
 
 function renderPipeDashboard() {
@@ -184,13 +188,8 @@ function renderPipeDashboard() {
         `).join('');
     }
 
-    const isGeneral = currentPipeTab === 'General' || activeCategories.length === 0;
-    let headerRow;
-    if (isGeneral) {
-        headerRow = [`<th style="text-align:left; padding:18px 16px; color:#64748b; font-size:13px; font-weight:700; letter-spacing:0.5px;">PIPE TYPE</th>`, `<th style="text-align:left; padding:18px 16px; color:#64748b; font-size:13px; font-weight:700; letter-spacing:0.5px;">PIPE SIZE</th>`, ...columns.map(col => `<th style="padding:18px 16px; color:#64748b; font-size:13px; font-weight:700; letter-spacing:0.5px; text-align:center;">${col}</th>`), `<th style="padding:18px 16px; width:80px; text-align:center;"></th>`].join('');
-    } else {
-        headerRow = [`<th style="text-align:left; padding:18px 16px; color:#64748b; font-size:13px; font-weight:700; letter-spacing:0.5px;">PIPE TYPE</th>`, `<th style="text-align:left; padding:18px 16px; color:#64748b; font-size:13px; font-weight:700; letter-spacing:0.5px;">PIPE SIZE</th>`, `<th style="padding:18px 16px; width:120px; text-align:center;"></th>`].join('');
-    }
+    const isGeneral = true; // Every category now renders as a matrix!
+    const headerRow = [`<th style="text-align:left; padding:18px 16px; color:#64748b; font-size:13px; font-weight:700; letter-spacing:0.5px;">PIPE TYPE</th>`, `<th style="text-align:left; padding:18px 16px; color:#64748b; font-size:13px; font-weight:700; letter-spacing:0.5px;">PIPE SIZE</th>`, ...columns.map(col => `<th style="padding:18px 16px; color:#64748b; font-size:13px; font-weight:700; letter-spacing:0.5px; text-align:center;">${col}</th>`), `<th style="padding:18px 16px; width:80px; text-align:center;"></th>`].join('');
 
     const header = document.querySelector('.pipe-dashboard-table thead');
     if (header) header.innerHTML = `<tr>${headerRow}</tr>`;
@@ -212,7 +211,7 @@ function renderPipeDashboard() {
             const pipeType = activeCategories.length > 0 ? currentPipeTab : (filtered.find(p => getPipeSize(p) === size) ? getPipeType(filtered.find(p => getPipeSize(p) === size)) : currentPipeTab);
             
             const values = columns.map(col => {
-                const p = filtered.find(prod => getPipeSize(prod) === size && getPipeWeightColumn(prod) === col);
+                const p = filtered.find(prod => getPipeSize(prod) === size && getPipeWeightColumn(prod, columns) === col);
                 const stockVal = p ? (p.stock || 0) : 0;
                 return `<td style="padding:18px 16px; text-align:center; vertical-align:middle;">
                     <div data-id="${p ? getId(p) : ''}" data-cat="supreme" data-subcat="${pipeType.replace(/"/g, '&quot;')}" data-size="${size.replace(/"/g, '&quot;')}" data-col="${col.replace(/"/g, '&quot;')}" data-value="${stockVal}" style="font-size:15px; font-weight:500; color:#0f172a; cursor:pointer;" onclick="window.openMatrixAddStockModalFromElement(this)">
@@ -285,8 +284,15 @@ function renderPipeDashboard() {
     initIcons();
 }
 
-window.setPipeTab = function(tab) {
+window.setPipeTab = async function(tab) {
     currentPipeTab = tab;
+    try {
+        const { fetchPipeColumns } = await import('./api.js?v=1.0.5');
+        const columns = await fetchPipeColumns(tab);
+        state.pipeColumns.splice(0, state.pipeColumns.length, ...columns);
+    } catch (err) {
+        console.error('Could not refresh pipe columns:', err);
+    }
     renderPipeDashboard();
 };
 

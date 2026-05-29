@@ -19,13 +19,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadAllData() {
     try {
-        const [products, requests, logs, locations, pipeCategories, pipeColumns] = await Promise.all([
+        const [products, requests, logs, locations, pipeCategories] = await Promise.all([
             fetchProducts(),
             fetchRequests(),
             fetchLogs(),
             fetchLocations(),
             fetchPipeCategories(),
-            fetchPipeColumns(),
         ]);
         // Mutate in-place so ui.js (which imported the same object) sees the updates
         state.products.splice(0, state.products.length, ...products);
@@ -33,7 +32,21 @@ async function loadAllData() {
         state.logs.splice(0, state.logs.length, ...logs);
         state.locations.splice(0, state.locations.length, ...locations);
         state.pipeCategories.splice(0, state.pipeCategories.length, ...pipeCategories);
-        state.pipeColumns.splice(0, state.pipeColumns.length, ...(pipeColumns || state.pipeColumns));
+        
+        // Determine default pipe tab
+        const activeCategories = state.pipeCategories
+            .filter(c => c.type === 'supreme' && c.active)
+            .sort((a, b) => (a.order || 0) - (b.order || 0) || a.name.localeCompare(b.name));
+        const tabs = activeCategories.length > 0
+            ? ['General', ...new Set(activeCategories.map(c => c.name))]
+            : [...new Set(products.filter(p => p.category === 'supreme').map(p => p.subCategory || 'General'))];
+        const defaultTab = tabs[0] || 'General';
+        window.currentPipeTab = defaultTab;
+
+        // Fetch columns for the default tab
+        const pipeColumns = await fetchPipeColumns(defaultTab);
+        state.pipeColumns.splice(0, state.pipeColumns.length, ...(pipeColumns || []));
+
         renderAll();
     } catch (err) {
         console.error('Failed to load data from backend:', err);
@@ -82,7 +95,8 @@ async function refreshPipeCategories() {
 
 async function refreshPipeColumns() {
     try {
-        const columns = await fetchPipeColumns();
+        const category = window.currentPipeTab || 'General';
+        const columns = await fetchPipeColumns(category);
         if (Array.isArray(columns)) {
             state.pipeColumns.splice(0, state.pipeColumns.length, ...columns);
         }
@@ -328,7 +342,8 @@ async function handleSavePipeColumns(e) {
     const checked = Array.from(document.querySelectorAll('#pipe-columns-form input[name="pipe-column"]:checked')).map(el => el.value);
     if (!checked.length) return alert('Select at least one column.');
     try {
-        await savePipeColumns(checked);
+        const category = window.currentPipeTab || 'General';
+        await savePipeColumns(category, checked);
         state.pipeColumns.splice(0, state.pipeColumns.length, ...checked);
         document.getElementById('pipe-columns-modal').style.display = 'none';
         renderAll();

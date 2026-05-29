@@ -208,13 +208,13 @@ export async function deletePipeCategory(id, deleteProducts = false) {
     if (!res.ok) throw new Error(await res.text());
 }
 
-export async function fetchPipeColumns() {
-    const res = await fetch(`${BASE_URL}/pipe-columns`);
+export async function fetchPipeColumns(category) {
+    const res = await fetch(`${BASE_URL}/pipe-columns/${encodeURIComponent(category)}`);
     return handleResponse(res);
 }
 
-export async function savePipeColumns(columns) {
-    const res = await fetch(`${BASE_URL}/pipe-columns`, {
+export async function savePipeColumns(category, columns) {
+    const res = await fetch(`${BASE_URL}/pipe-columns/${encodeURIComponent(category)}`, {
         method: 'PUT',
         headers: headers(),
         body: JSON.stringify({ columns }),
