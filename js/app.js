@@ -1,6 +1,6 @@
-import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.1.13';
-import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.1.13';
-import { state } from './state.js?v=1.1.13';
+import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.1.14';
+import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.1.14';
+import { state } from './state.js?v=1.1.14';
 
 // ──────────────────────────────────────────
 // INIT
@@ -2246,14 +2246,9 @@ function renderLocationList() {
     html += state.locations.map(loc => {
         const isSelected = activeFilter === loc.name;
         return `
-            <div class="flex justify-between items-center glass-row" style="padding:12px 16px; border:1px solid ${isSelected ? '#2563eb' : 'var(--border-light)'}; border-radius:12px; background:${isSelected ? 'rgba(37,99,235,0.08)' : 'rgba(255,255,255,0.4)'}; margin-bottom:4px; gap: 8px;">
-                <div class="flex justify-between items-center cursor-pointer" style="flex: 1;" onclick="window.selectGodown('${loc.name.replace(/'/g, "\\'")}')">
-                    <span style="font-weight:600; color:${isSelected ? '#2563eb' : 'inherit'};">${loc.name}</span>
-                    ${isSelected ? '<i data-lucide="check" size="16" style="color:#2563eb;"></i>' : '<i data-lucide="chevron-right" size="16" style="color:var(--text-muted);"></i>'}
-                </div>
-                <button type="button" onclick="window.deleteLocation('${loc.name.replace(/'/g, "\\'")}')" style="background: #ffffff; border: 1px solid #ef4444; color: #ef4444; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; flex-shrink: 0;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#ffffff'">
-                    <i data-lucide="trash-2" size="16"></i>
-                </button>
+            <div class="flex justify-between items-center glass-row cursor-pointer" style="padding:12px 16px; border:1px solid ${isSelected ? '#2563eb' : 'var(--border-light)'}; border-radius:12px; background:${isSelected ? 'rgba(37,99,235,0.08)' : 'rgba(255,255,255,0.4)'}; margin-bottom:4px;" onclick="window.selectGodown('${loc.name.replace(/'/g, "\\'")}')">
+                <span style="font-weight:600; color:${isSelected ? '#2563eb' : 'inherit'};">${loc.name}</span>
+                ${isSelected ? '<i data-lucide="check" size="16" style="color:#2563eb;"></i>' : '<i data-lucide="chevron-right" size="16" style="color:var(--text-muted);"></i>'}
             </div>
         `;
     }).join('');
