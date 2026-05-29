@@ -1,6 +1,6 @@
-import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.1.10';
-import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.1.10';
-import { state } from './state.js?v=1.1.10';
+import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.1.11';
+import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.1.11';
+import { state } from './state.js?v=1.1.11';
 
 // ──────────────────────────────────────────
 // INIT
@@ -528,6 +528,11 @@ function setupEventListeners() {
     window.openLocationManager = openLocationManager;
     window.addLocation = addLocation;
     window.deleteLocation = deleteLocation;
+    window.selectGodown = (locationName) => {
+        window.selectedGodownFilter = locationName;
+        window.closeModal('location-manager-modal');
+        renderAll();
+    };
     window.removeManagerSerial = removeManagerSerial;
     window.closeModal = (id) => document.getElementById(id).style.display = 'none';
     window.refreshAllProductDropdowns = refreshAllProductDropdowns;
@@ -2173,11 +2178,27 @@ async function syncLocationDropdowns() {
 function renderLocationList() {
     const list = document.getElementById('location-list');
     if (!list) return;
-    list.innerHTML = state.locations.map(loc => `
-        <div class="flex justify-between items-center glass-row" style="padding:12px 16px; border:1px solid var(--border-light); border-radius:12px; background:rgba(255,255,255,0.4); margin-bottom:4px;">
-            <span style="font-weight:600;">${loc.name}</span>
+    
+    const activeFilter = window.selectedGodownFilter || 'all';
+    
+    let html = `
+        <div class="flex justify-between items-center glass-row cursor-pointer" style="padding:12px 16px; border:1px solid ${activeFilter === 'all' ? '#2563eb' : 'var(--border-light)'}; border-radius:12px; background:${activeFilter === 'all' ? 'rgba(37,99,235,0.08)' : 'rgba(255,255,255,0.4)'}; margin-bottom:8px;" onclick="window.selectGodown('all')">
+            <span style="font-weight:600; color:${activeFilter === 'all' ? '#2563eb' : 'inherit'};">All Godowns (Global Inventory)</span>
+            ${activeFilter === 'all' ? '<i data-lucide="check" size="16" style="color:#2563eb;"></i>' : '<i data-lucide="chevron-right" size="16" style="color:var(--text-muted);"></i>'}
         </div>
-    `).join('') || '<div style="text-align:center; color:var(--text-muted); font-size:13px; padding:20px;">No locations added yet.</div>';
+    `;
+    
+    html += state.locations.map(loc => {
+        const isSelected = activeFilter === loc.name;
+        return `
+            <div class="flex justify-between items-center glass-row cursor-pointer" style="padding:12px 16px; border:1px solid ${isSelected ? '#2563eb' : 'var(--border-light)'}; border-radius:12px; background:${isSelected ? 'rgba(37,99,235,0.08)' : 'rgba(255,255,255,0.4)'}; margin-bottom:4px;" onclick="window.selectGodown('${loc.name.replace(/'/g, "\\'")}')">
+                <span style="font-weight:600; color:${isSelected ? '#2563eb' : 'inherit'};">${loc.name}</span>
+                ${isSelected ? '<i data-lucide="check" size="16" style="color:#2563eb;"></i>' : '<i data-lucide="chevron-right" size="16" style="color:var(--text-muted);"></i>'}
+            </div>
+        `;
+    }).join('');
+    
+    list.innerHTML = html;
     initIcons();
 }
 

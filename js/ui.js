@@ -1,4 +1,4 @@
-import { state } from './state.js?v=1.1.10';
+import { state } from './state.js?v=1.1.11';
 
 export function initIcons() {
     if (window.lucide) {
@@ -167,6 +167,15 @@ function getPipeWeightColumn(product, columns) {
 }
 
 function renderPipeDashboard() {
+    const headerTitle = document.getElementById('pipes-inventory-header');
+    if (headerTitle) {
+        if (window.selectedGodownFilter && window.selectedGodownFilter !== 'all') {
+            headerTitle.textContent = `Pipes Inventory (${window.selectedGodownFilter})`;
+        } else {
+            headerTitle.textContent = 'Pipes Inventory';
+        }
+    }
+
     const products = state.products.filter(p => p.category === 'supreme');
     const columns = state.pipeColumns.length ? state.pipeColumns : ['4KG','6KG','10KG','15KG','SLOTTED'];
     const activeCategories = state.pipeCategories
@@ -212,7 +221,14 @@ function renderPipeDashboard() {
             
             const values = columns.map(col => {
                 const p = filtered.find(prod => getPipeSize(prod) === size && getPipeWeightColumn(prod, columns) === col);
-                const stockVal = p ? (p.stock || 0) : 0;
+                let stockVal = 0;
+                if (p) {
+                    if (window.selectedGodownFilter && window.selectedGodownFilter !== 'all') {
+                        stockVal = (p.units || []).filter(u => u.location === window.selectedGodownFilter && u.status === 'available').length;
+                    } else {
+                        stockVal = p.stock || 0;
+                    }
+                }
                 return `<td style="padding:18px 16px; text-align:center; vertical-align:middle;">
                     <div data-id="${p ? getId(p) : ''}" data-cat="supreme" data-subcat="${pipeType.replace(/"/g, '&quot;')}" data-size="${size.replace(/"/g, '&quot;')}" data-col="${col.replace(/"/g, '&quot;')}" data-value="${stockVal}" style="font-size:15px; font-weight:500; color:#0f172a; cursor:pointer;" onclick="window.openMatrixAddStockModalFromElement(this)">
                         ${stockVal}
@@ -243,7 +259,12 @@ function renderPipeDashboard() {
         rows = filtered.map(p => {
             const pipeType = p.name;
             const size = getPipeSize(p);
-            const stockVal = p.stock || 0;
+            let stockVal = 0;
+            if (window.selectedGodownFilter && window.selectedGodownFilter !== 'all') {
+                stockVal = (p.units || []).filter(u => u.location === window.selectedGodownFilter && u.status === 'available').length;
+            } else {
+                stockVal = p.stock || 0;
+            }
             return `
                 <tr style="border-bottom:1px solid #e2e8f0;">
                     <td style="padding:18px 16px; color:#0f172a; font-weight:700; font-size:15px;">
@@ -281,7 +302,7 @@ function renderPipeDashboard() {
 window.setPipeTab = async function(tab) {
     currentPipeTab = tab;
     try {
-        const { fetchPipeColumns } = await import('./api.js?v=1.1.10');
+        const { fetchPipeColumns } = await import('./api.js?v=1.1.11');
         const columns = await fetchPipeColumns(tab);
         state.pipeColumns.splice(0, state.pipeColumns.length, ...columns);
     } catch (err) {
@@ -291,6 +312,15 @@ window.setPipeTab = async function(tab) {
 };
 
 export function renderFittingMatrix() {
+    const headerTitle = document.getElementById('fittings-inventory-header');
+    if (headerTitle) {
+        if (window.selectedGodownFilter && window.selectedGodownFilter !== 'all') {
+            headerTitle.textContent = `Fittings Inventory (${window.selectedGodownFilter})`;
+        } else {
+            headerTitle.textContent = 'Fittings Inventory';
+        }
+    }
+
     const fittingProducts = state.products.filter(p => p.category === 'fitting');
     
     const getTabName = (p) => p.subCategory || (p.name ? p.name.split(' ')[0] + ' FITTINGS' : 'UNCATEGORIZED');
@@ -374,7 +404,14 @@ export function renderFittingMatrix() {
                 
                 for (let size of sizes) {
                     const product = tabProducts.find(p => getItemName(p) === itemName && getSize(p) === size);
-                    const stockVal = product ? product.stock : 0;
+                    let stockVal = 0;
+                    if (product) {
+                        if (window.selectedGodownFilter && window.selectedGodownFilter !== 'all') {
+                            stockVal = (product.units || []).filter(u => u.location === window.selectedGodownFilter && u.status === 'available').length;
+                        } else {
+                            stockVal = product.stock;
+                        }
+                    }
                     const stockClass = product && stockVal <= (product.lowStockLimit || 10) ? 'color: var(--danger); font-weight: 700;' : '';
                     
                     rowHtml += `<td style="${stockClass} text-align:center; min-width:90px; vertical-align:middle;" ${product ? `data-id="${getId(product)}"` : ''}>
@@ -410,7 +447,7 @@ export function renderFittingMatrix() {
 window.setFittingTab = async function(tab) {
     currentFittingTab = tab;
     try {
-        const { fetchPipeColumns } = await import('./api.js?v=1.1.10');
+        const { fetchPipeColumns } = await import('./api.js?v=1.1.11');
         const columns = await fetchPipeColumns(tab);
         state.fittingColumns.splice(0, state.fittingColumns.length, ...columns);
     } catch (err) {
@@ -437,8 +474,20 @@ export function renderInventory(category) {
             (p.units || []).some(u => u.serialNumber.toLowerCase().includes(searchTerm)))
     );
     if (category === 'cri') {
+        const headerTitle = document.getElementById('motors-inventory-header');
+        if (headerTitle) {
+            if (window.selectedGodownFilter && window.selectedGodownFilter !== 'all') {
+                headerTitle.textContent = `Motors Inventory (${window.selectedGodownFilter})`;
+            } else {
+                headerTitle.textContent = 'Motors Inventory';
+            }
+        }
+
         container.innerHTML = prods.map(p => {
-            const units = (p.units || []).filter(u => u.serialNumber && u.serialNumber.trim());
+            let units = (p.units || []).filter(u => u.serialNumber && u.serialNumber.trim());
+            if (window.selectedGodownFilter && window.selectedGodownFilter !== 'all') {
+                units = units.filter(u => u.location === window.selectedGodownFilter);
+            }
             const locationGroups = Object.entries(units.reduce((acc, u) => {
                 const loc = u.location || 'Main Godown';
                 if (!acc[loc]) acc[loc] = [];
@@ -449,7 +498,13 @@ export function renderInventory(category) {
             const phase = p.specs?.phase || '';
             const type = p.specs?.type || '';
             const name = p.name || `${hp ? hp + ' HP' : ''}${hp && phase ? ' ' : ''}${phase ? phase : ''} Motor`;
-            const qty = p.stock || units.length;
+            
+            let qty = 0;
+            if (window.selectedGodownFilter && window.selectedGodownFilter !== 'all') {
+                qty = (p.units || []).filter(u => u.location === window.selectedGodownFilter && u.status === 'available').length;
+            } else {
+                qty = p.stock || (p.units || []).filter(u => u.serialNumber && u.serialNumber.trim()).length;
+            }
             
             return `
                 <div class="glass product-card" style="padding: 24px; border-radius: 12px; margin-bottom: 24px; background: white;">
