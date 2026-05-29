@@ -348,42 +348,15 @@ export function renderFittingMatrix() {
         return n.toUpperCase() || 'UNKNOWN';
     };
 
-    const sizes = [...new Set(tabProducts.map(getSize))].filter(s => s !== '-').sort((a,b) => {
-        const parseSize = (s) => {
-            let val = 0;
-            const parts = s.replace(/["']/g, '').split(' ');
-            for (let part of parts) {
-                if (part.includes('/')) {
-                    const [num, den] = part.split('/');
-                    val += parseFloat(num) / parseFloat(den);
-                } else {
-                    val += parseFloat(part);
-                }
-            }
-            return val || 999;
-        };
-        return parseSize(a) - parseSize(b);
-    });
-    
-    if (sizes.length === 0) sizes.push('-'); 
+    const sizes = state.fittingColumns.length ? state.fittingColumns : ['1/2"', '3/4"', '1"', '1-1/4"', '1-1/2"', '2"'];
     
     const itemNames = [...new Set(tabProducts.map(getItemName))].sort();
     
-    const thead = document.getElementById('fitting-matrix-head');
-    if (thead) {
         thead.innerHTML = `
             <tr>
                 <th style="min-width: 150px; padding:18px 16px; color:#64748b; font-size:13px; font-weight:700; letter-spacing:0.5px; text-align:left;">ITEM NAME</th>
-                ${sizes.map(s => `<th style="padding:18px 16px; text-align:center; color:#64748b; font-size:13px; font-weight:700; letter-spacing:0.5px;">
-                    <div style="display:flex; justify-content:center; align-items:center;">
-                        <span>${s}</span>
-                        <i data-lucide="edit-2" class="cursor-pointer admin-only" style="margin-left:8px; color:#0f172a; opacity:0.6;" size="14" onclick="window.editFittingSize('${s.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', '${currentFittingTab.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')" title="Edit Size"></i>
-                        <i data-lucide="trash-2" class="cursor-pointer admin-only" style="margin-left:4px; color:var(--danger); opacity:0.6;" size="14" onclick="window.deleteFittingSize('${s.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', '${currentFittingTab.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')" title="Delete Size"></i>
-                    </div>
-                </th>`).join('')}
-                <th class="admin-only" style="cursor:pointer; color:var(--primary); padding:18px 16px; font-size:13px; font-weight:700; text-align:center;" onclick="window.addFittingSize('${currentFittingTab}')">
-                    + Add Size
-                </th>
+                ${sizes.map(s => `<th style="padding:18px 16px; text-align:center; color:#64748b; font-size:13px; font-weight:700; letter-spacing:0.5px;">${s}</th>`).join('')}
+                <th class="admin-only" style="width: 80px;"></th>
             </tr>
         `;
     }
@@ -431,8 +404,15 @@ export function renderFittingMatrix() {
     }
 }
 
-window.setFittingTab = function(tab) {
+window.setFittingTab = async function(tab) {
     currentFittingTab = tab;
+    try {
+        const { fetchPipeColumns } = await import('./api.js?v=1.0.5');
+        const columns = await fetchPipeColumns(tab);
+        state.fittingColumns.splice(0, state.fittingColumns.length, ...columns);
+    } catch (err) {
+        console.error('Could not refresh fitting columns:', err);
+    }
     renderFittingMatrix();
 };
 

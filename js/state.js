@@ -7,4 +7,5 @@ export const state = {
     locations: [],
     pipeCategories: [],
     pipeColumns: ['4KG', '6KG', '10KG', '15KG', 'SLOTTED'],
+    fittingColumns: ['1/2"', '3/4"', '1"', '1-1/4"', '1-1/2"', '2"'],
 };
