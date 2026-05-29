@@ -1,6 +1,6 @@
-import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.1.9';
-import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.1.9';
-import { state } from './state.js?v=1.1.9';
+import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.1.10';
+import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.1.10';
+import { state } from './state.js?v=1.1.10';
 
 // ──────────────────────────────────────────
 // INIT
@@ -2174,11 +2174,8 @@ function renderLocationList() {
     const list = document.getElementById('location-list');
     if (!list) return;
     list.innerHTML = state.locations.map(loc => `
-        <div class="flex justify-between items-center glass-row" style="padding:10px; border:1px solid var(--border-light); border-radius:12px; background:rgba(255,255,255,0.4); margin-bottom:4px;">
+        <div class="flex justify-between items-center glass-row" style="padding:12px 16px; border:1px solid var(--border-light); border-radius:12px; background:rgba(255,255,255,0.4); margin-bottom:4px;">
             <span style="font-weight:600;">${loc.name}</span>
-            <button class="glass-btn" style="padding:6px; color:var(--danger); background:rgba(239,68,68,0.05);" onclick="deleteLocation('${loc.name}')">
-                <i data-lucide="trash-2" size="16"></i>
-            </button>
         </div>
     `).join('') || '<div style="text-align:center; color:var(--text-muted); font-size:13px; padding:20px;">No locations added yet.</div>';
     initIcons();
