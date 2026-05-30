@@ -27,6 +27,32 @@ function getInitialBaseUrl() {
 
 export let BASE_URL = getInitialBaseUrl();
 
+// Global fetch interceptor for production self-healing
+const originalFetch = window.fetch;
+window.fetch = async function(url, options = {}) {
+    try {
+        return await originalFetch(url, options);
+    } catch (err) {
+        // Auto-detect: if running on a production/live domain, but calling localhost
+        const isLocalHost = window.location.hostname === 'localhost' || 
+                            window.location.hostname === '127.0.0.1' || 
+                            window.location.hostname === '' || 
+                            window.location.protocol === 'file:' ||
+                            window.location.hostname.startsWith('192.168.') ||
+                            window.location.hostname.startsWith('10.') ||
+                            window.location.hostname.endsWith('.local');
+
+        if (!isLocalHost && typeof url === 'string' && url.includes(LOCAL_BACKEND_URL)) {
+            console.warn("CORS/Connection error detected on production domain while connected to local server. Self-healing: switching to Live Backend.");
+            localStorage.removeItem('ss_server_type');
+            BASE_URL = LIVE_BACKEND_URL;
+            const newUrl = url.replace(LOCAL_BACKEND_URL, LIVE_BACKEND_URL);
+            return await originalFetch(newUrl, options);
+        }
+        throw err;
+    }
+};
+
 export function updateBaseUrl(type) {
     if (type === 'local') {
         localStorage.setItem('ss_server_type', 'local');
