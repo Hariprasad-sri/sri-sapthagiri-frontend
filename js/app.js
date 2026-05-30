@@ -1,6 +1,6 @@
-import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.2.3';
-import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, updateBaseUrl, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.2.3';
-import { state } from './state.js?v=1.2.3';
+import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.2.4';
+import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, updateBaseUrl, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.2.4';
+import { state } from './state.js?v=1.2.4';
 
 // ──────────────────────────────────────────
 // INIT
@@ -18,7 +18,76 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+function setupTabsAndColumns(products) {
+    // Determine default pipe tab
+    const activeCategories = state.pipeCategories
+        .filter(c => c.type === 'supreme' && c.active)
+        .sort((a, b) => (a.order || 0) - (b.order || 0) || a.name.localeCompare(b.name));
+    const tabs = activeCategories.length > 0
+        ? [...new Set(activeCategories.map(c => c.name))]
+        : [...new Set(products.filter(p => p.category === 'supreme').map(p => p.subCategory || 'General'))].filter(t => t !== 'General');
+    const defaultTab = tabs[0] || 'General';
+    window.currentPipeTab = defaultTab;
+
+    // Load columns for pipe tab
+    const cachedPipeColumns = localStorage.getItem(`cache_columns_${defaultTab}`);
+    if (cachedPipeColumns) {
+        state.pipeColumns.splice(0, state.pipeColumns.length, ...JSON.parse(cachedPipeColumns));
+    } else {
+        state.pipeColumns.splice(0, state.pipeColumns.length, '4KG', '6KG', '10KG', '15KG', 'SLOTTED');
+    }
+
+    // Determine default fitting tab
+    const activeFittingCategories = state.pipeCategories
+        .filter(c => c.type === 'fitting' && c.active)
+        .sort((a, b) => (a.order || 0) - (b.order || 0) || a.name.localeCompare(b.name));
+    
+    const getFittingTabName = (p) => p.subCategory || (p.name ? p.name.split(' ')[0] + ' FITTINGS' : 'UNCATEGORIZED');
+    const fittingTabs = activeFittingCategories.length > 0
+        ? [...new Set(activeFittingCategories.map(c => c.name))]
+        : [...new Set(products.filter(p => p.category === 'fitting').map(getFittingTabName))];
+    const defaultFittingTab = fittingTabs[0] || 'PVC FITTINGS';
+    window.currentFittingTab = defaultFittingTab;
+
+    // Load columns for fitting tab
+    const cachedFittingColumns = localStorage.getItem(`cache_columns_${defaultFittingTab}`);
+    if (cachedFittingColumns) {
+        state.fittingColumns.splice(0, state.fittingColumns.length, ...JSON.parse(cachedFittingColumns));
+    } else {
+        state.fittingColumns.splice(0, state.fittingColumns.length, '1/2"', '3/4"', '1"', '1-1/4"', '1-1/2"', '2"');
+    }
+}
+
+function loadCachedData() {
+    try {
+        const cachedProducts = localStorage.getItem('cache_products');
+        const cachedRequests = localStorage.getItem('cache_requests');
+        const cachedLogs = localStorage.getItem('cache_logs');
+        const cachedLocations = localStorage.getItem('cache_locations');
+        const cachedPipeCategories = localStorage.getItem('cache_pipe_categories');
+
+        if (cachedProducts) state.products.splice(0, state.products.length, ...JSON.parse(cachedProducts));
+        if (cachedRequests) state.requests.splice(0, state.requests.length, ...JSON.parse(cachedRequests));
+        if (cachedLogs) state.logs.splice(0, state.logs.length, ...JSON.parse(cachedLogs));
+        if (cachedLocations) state.locations.splice(0, state.locations.length, ...JSON.parse(cachedLocations));
+        if (cachedPipeCategories) state.pipeCategories.splice(0, state.pipeCategories.length, ...JSON.parse(cachedPipeCategories));
+
+        if (state.products.length > 0 || state.pipeCategories.length > 0) {
+            setupTabsAndColumns(state.products);
+            renderAll();
+        }
+    } catch (e) {
+        console.error('Error loading cached data:', e);
+    }
+}
+
+let isReloadingData = false;
+let reloadAttempts = 0;
+
 async function loadAllData() {
+    if (isReloadingData) return;
+    isReloadingData = true;
+
     try {
         const [products, requests, logs, locations, pipeCategories] = await Promise.all([
             fetchProducts(),
@@ -27,47 +96,57 @@ async function loadAllData() {
             fetchLocations(),
             fetchPipeCategories(),
         ]);
-        // Mutate in-place so ui.js (which imported the same object) sees the updates
+        
+        // Save to cache
+        localStorage.setItem('cache_products', JSON.stringify(products));
+        localStorage.setItem('cache_requests', JSON.stringify(requests));
+        localStorage.setItem('cache_logs', JSON.stringify(logs));
+        localStorage.setItem('cache_locations', JSON.stringify(locations));
+        localStorage.setItem('cache_pipe_categories', JSON.stringify(pipeCategories));
+
+        // Mutate in-place so ui.js sees the updates
         state.products.splice(0, state.products.length, ...products);
         state.requests.splice(0, state.requests.length, ...requests);
         state.logs.splice(0, state.logs.length, ...logs);
         state.locations.splice(0, state.locations.length, ...locations);
         state.pipeCategories.splice(0, state.pipeCategories.length, ...pipeCategories);
         
-        // Determine default pipe tab
-        const activeCategories = state.pipeCategories
-            .filter(c => c.type === 'supreme' && c.active)
-            .sort((a, b) => (a.order || 0) - (b.order || 0) || a.name.localeCompare(b.name));
-        const tabs = activeCategories.length > 0
-            ? [...new Set(activeCategories.map(c => c.name))]
-            : [...new Set(products.filter(p => p.category === 'supreme').map(p => p.subCategory || 'General'))].filter(t => t !== 'General');
-        const defaultTab = tabs[0] || 'General';
-        window.currentPipeTab = defaultTab;
+        setupTabsAndColumns(products);
 
-        // Fetch columns for the default tab
-        const pipeColumns = await fetchPipeColumns(defaultTab);
-        state.pipeColumns.splice(0, state.pipeColumns.length, ...(pipeColumns || []));
+        // Fetch columns for the default tabs in background
+        const defaultTab = window.currentPipeTab || 'General';
+        const defaultFittingTab = window.currentFittingTab || 'PVC FITTINGS';
 
-        // Determine default fitting tab
-        const activeFittingCategories = state.pipeCategories
-            .filter(c => c.type === 'fitting' && c.active)
-            .sort((a, b) => (a.order || 0) - (b.order || 0) || a.name.localeCompare(b.name));
-        
-        const getFittingTabName = (p) => p.subCategory || (p.name ? p.name.split(' ')[0] + ' FITTINGS' : 'UNCATEGORIZED');
-        const fittingTabs = activeFittingCategories.length > 0
-            ? [...new Set(activeFittingCategories.map(c => c.name))]
-            : [...new Set(products.filter(p => p.category === 'fitting').map(getFittingTabName))];
-        const defaultFittingTab = fittingTabs[0] || 'PVC FITTINGS';
-        window.currentFittingTab = defaultFittingTab;
+        const [pipeColumns, fittingColumns] = await Promise.all([
+            fetchPipeColumns(defaultTab).catch(() => null),
+            fetchPipeColumns(defaultFittingTab).catch(() => null),
+        ]);
 
-        // Fetch columns for the default fitting tab
-        const fittingColumns = await fetchPipeColumns(defaultFittingTab);
-        state.fittingColumns.splice(0, state.fittingColumns.length, ...(fittingColumns || []));
+        if (pipeColumns && Array.isArray(pipeColumns)) {
+            state.pipeColumns.splice(0, state.pipeColumns.length, ...pipeColumns);
+            localStorage.setItem(`cache_columns_${defaultTab}`, JSON.stringify(pipeColumns));
+        }
+        if (fittingColumns && Array.isArray(fittingColumns)) {
+            state.fittingColumns.splice(0, state.fittingColumns.length, ...fittingColumns);
+            localStorage.setItem(`cache_columns_${defaultFittingTab}`, JSON.stringify(fittingColumns));
+        }
 
         renderAll();
+        reloadAttempts = 0; // Reset attempts on success
     } catch (err) {
-        console.error('Failed to load data from backend:', err);
+        console.error('Failed to load data from backend, retrying shortly:', err);
+        
+        // Exponential backoff retry (max 10 seconds)
+        reloadAttempts++;
+        const delay = Math.min(1000 * Math.pow(1.5, reloadAttempts), 10000);
+        setTimeout(() => {
+            isReloadingData = false;
+            loadAllData().catch(e => console.error('Retry data reload failed:', e));
+        }, delay);
+        return; // Keep flag as true until retry runs to prevent overlapping calls
     }
+
+    isReloadingData = false;
 }
 
 async function checkServerConnection() {
@@ -1139,6 +1218,7 @@ function login(role) {
         document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
         document.querySelectorAll('.transporter-only').forEach(el => el.classList.remove('hidden'));
     }
+    loadCachedData();
     loadAllData();
 }
 
