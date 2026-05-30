@@ -10,21 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initIcons();
     checkServerConnection();
 
-    // Handle Server Select dropdown
-    const serverSelect = document.getElementById('server-select');
-    if (serverSelect) {
-        serverSelect.value = localStorage.getItem('ss_server_type') || 'auto';
-        serverSelect.addEventListener('change', (e) => {
-            updateBaseUrl(e.target.value);
-            checkServerConnection();
-            
-            // Reload all data if user is already logged in
-            const savedUser = sessionStorage.getItem('ss_user');
-            if (savedUser) {
-                loadAllData().then(renderAll).catch(err => console.error(err));
-            }
-        });
-    }
 
     // Check for existing session
     const savedUser = sessionStorage.getItem('ss_user');
