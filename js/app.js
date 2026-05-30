@@ -477,23 +477,6 @@ function setupEventListeners() {
         }
     });
 
-    document.getElementById('btn-refresh-data')?.addEventListener('click', async (e) => {
-        const btn = e.currentTarget;
-        const origContent = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<i data-lucide="refresh-cw" class="animate-spin"></i> Syncing...';
-        initIcons();
-        try {
-            await loadAllData();
-        } catch (err) {
-            console.error('Error reloading data:', err);
-            alert('Failed to refresh data from server.');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = origContent;
-            initIcons();
-        }
-    });
 
     document.getElementById('btn-logout')?.addEventListener('click', logout);
     document.getElementById('btn-export-csv')?.addEventListener('click', exportLogsToCSV);
