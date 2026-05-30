@@ -5,9 +5,6 @@ const LOCAL_BACKEND_URL = 'http://localhost:5001/api';
 const savedServer = localStorage.getItem('ss_server_type');
 
 function getInitialBaseUrl() {
-    if (savedServer === 'local') return LOCAL_BACKEND_URL;
-    if (savedServer === 'live') return LIVE_BACKEND_URL;
-
     // Auto-detect: if running on localhost, local IP, or file:/// protocol, use the local backend
     const isLocal = window.location.hostname === 'localhost' || 
                     window.location.hostname === '127.0.0.1' || 
@@ -16,7 +13,16 @@ function getInitialBaseUrl() {
                     window.location.hostname.startsWith('192.168.') ||
                     window.location.hostname.startsWith('10.') ||
                     window.location.hostname.endsWith('.local');
-    return isLocal ? LOCAL_BACKEND_URL : LIVE_BACKEND_URL;
+
+    if (!isLocal) {
+        // If not running locally, always force production URL and clean up any old local storage state
+        localStorage.removeItem('ss_server_type');
+        return LIVE_BACKEND_URL;
+    }
+
+    if (savedServer === 'local') return LOCAL_BACKEND_URL;
+    if (savedServer === 'live') return LIVE_BACKEND_URL;
+    return LOCAL_BACKEND_URL;
 }
 
 export let BASE_URL = getInitialBaseUrl();
