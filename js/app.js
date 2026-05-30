@@ -1,6 +1,6 @@
-import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.1.15';
-import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.1.15';
-import { state } from './state.js?v=1.1.15';
+import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.1.16';
+import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, updateBaseUrl, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.1.16';
+import { state } from './state.js?v=1.1.16';
 
 // ──────────────────────────────────────────
 // INIT
@@ -9,6 +9,22 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     initIcons();
     checkServerConnection();
+
+    // Handle Server Select dropdown
+    const serverSelect = document.getElementById('server-select');
+    if (serverSelect) {
+        serverSelect.value = localStorage.getItem('ss_server_type') || 'auto';
+        serverSelect.addEventListener('change', (e) => {
+            updateBaseUrl(e.target.value);
+            checkServerConnection();
+            
+            // Reload all data if user is already logged in
+            const savedUser = sessionStorage.getItem('ss_user');
+            if (savedUser) {
+                loadAllData().then(renderAll).catch(err => console.error(err));
+            }
+        });
+    }
 
     // Check for existing session
     const savedUser = sessionStorage.getItem('ss_user');
@@ -72,12 +88,19 @@ async function loadAllData() {
 async function checkServerConnection() {
     const statusEl = document.getElementById('connection-status');
     const textEl = statusEl?.querySelector('.status-text');
+    
+    // Check if it was previously offline or checking connection
+    const wasOffline = statusEl && (
+        statusEl.classList.contains('status-offline') || 
+        (textEl && textEl.textContent.includes('Checking'))
+    );
+    
     const updateStatus = (online) => {
         if (online) {
-            statusEl.className = 'status-indicator status-online';
+            if (statusEl) statusEl.className = 'status-indicator status-online';
             if (textEl) textEl.textContent = 'Server Online';
         } else {
-            statusEl.className = 'status-indicator status-offline';
+            if (statusEl) statusEl.className = 'status-indicator status-offline';
             if (textEl) textEl.textContent = 'Server Offline';
         }
     };
@@ -86,7 +109,17 @@ async function checkServerConnection() {
         const contentType = res.headers.get('content-type');
         if (res.ok && contentType && contentType.includes('application/json')) {
             const data = await res.json();
-            updateStatus(data.status === 'ok');
+            const online = data.status === 'ok';
+            updateStatus(online);
+            
+            // If server just came online and user has an active session, auto-reload data
+            if (online && wasOffline) {
+                const savedUser = sessionStorage.getItem('ss_user');
+                if (savedUser) {
+                    console.log('📡 Server connection restored. Reloading data...');
+                    loadAllData().catch(err => console.error('Error reloading data:', err));
+                }
+            }
         } else {
             throw new Error();
         }
@@ -459,6 +492,24 @@ function setupEventListeners() {
         }
     });
 
+    document.getElementById('btn-refresh-data')?.addEventListener('click', async (e) => {
+        const btn = e.currentTarget;
+        const origContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="refresh-cw" class="animate-spin"></i> Syncing...';
+        initIcons();
+        try {
+            await loadAllData();
+        } catch (err) {
+            console.error('Error reloading data:', err);
+            alert('Failed to refresh data from server.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = origContent;
+            initIcons();
+        }
+    });
+
     document.getElementById('btn-logout')?.addEventListener('click', logout);
     document.getElementById('btn-export-csv')?.addEventListener('click', exportLogsToCSV);
 
@@ -627,7 +678,7 @@ function setupEventListeners() {
 
         const location = (window.selectedGodownFilter && window.selectedGodownFilter !== 'all')
             ? window.selectedGodownFilter
-            : 'Main Godown';
+            : 'SHOP';
 
         if (ctx.id) {
             const product = state.products.find(p => (p._id || p.id) === ctx.id);
@@ -743,7 +794,7 @@ function setupEventListeners() {
 
             const location = (window.selectedGodownFilter && window.selectedGodownFilter !== 'all')
                 ? window.selectedGodownFilter
-                : 'Main Godown';
+                : 'SHOP';
 
             const newProduct = {
                 category,
@@ -1292,7 +1343,7 @@ function openProductModal(category, id = null) {
     }
 
     modal.style.display = 'flex';
-    if (window.gsap) gsap.from('#product-modal .modal-content', { scale: 0.88, opacity: 0, duration: 0.25, ease: 'power2.out' });
+    if (window.gsap) gsap.from('#product-modal .modal-content', { scale: 0.88, opacity: 0, duration: 0.05, ease: 'power2.out' });
     initIcons();
 }
 
@@ -1469,7 +1520,7 @@ function openStockModal(id) {
     }
 
     modal.style.display = 'flex';
-    if (window.gsap) gsap.from('#stock-modal .modal-content', { scale: 0.8, opacity: 0, duration: 0.3 });
+    if (window.gsap) gsap.from('#stock-modal .modal-content', { scale: 0.8, opacity: 0, duration: 0.05 });
     initIcons();
 }
 
@@ -1545,7 +1596,7 @@ function openUnitModal(id) {
                         ${statusIcon[u.status] || ''} ${u.status.toUpperCase()}
                     </span>
                 </td>
-                <td><span class="location-badge">${u.location || 'Main Godown'}</span></td>
+                <td><span class="location-badge">${u.location || 'SHOP'}</span></td>
                 <td style="color:var(--text-muted); font-size:12px;">${new Date(u.timestamp).toLocaleString()}</td>
             </tr>
         `).join('');
@@ -1604,7 +1655,7 @@ function openUnitModal(id) {
     }
 
     modal.style.display = 'flex';
-    if (window.gsap) gsap.from('#unit-modal .modal-content', { scale: 0.88, opacity: 0, duration: 0.25 });
+    if (window.gsap) gsap.from('#unit-modal .modal-content', { scale: 0.88, opacity: 0, duration: 0.05 });
     initIcons();
 }
 
@@ -1800,7 +1851,7 @@ function openRequestModal(isInternal = false) {
     addRequestItemRow(); // Add first row
 
     modal.style.display = 'flex';
-    if (window.gsap) gsap.from('#request-modal .modal-content', { scale: 0.8, opacity: 0, duration: 0.3 });
+    if (window.gsap) gsap.from('#request-modal .modal-content', { scale: 0.8, opacity: 0, duration: 0.05 });
     initIcons();
 }
 
@@ -1857,24 +1908,33 @@ function addRequestItemRow() {
             filtered.forEach(p => {
                 const model = p.model || p.specs?.model || '';
                 const sourceLoc = document.getElementById('req-source').value;
-                const availableUnits = (p.units || []).filter(u => u.location === sourceLoc && u.status === 'available');
+                const allAvailableUnits = (p.units || []).filter(u => u.status === 'available');
+                const availableUnitsAtSource = allAvailableUnits.filter(u => u.location === sourceLoc);
 
-                // 1. Units with serial numbers get individual lines
-                const withSN = availableUnits.filter(u => u.serialNumber && u.serialNumber.trim());
-                // 2. Units without serial numbers (blank) get a single bulk line
-                const withoutSN = availableUnits.filter(u => !u.serialNumber || !u.serialNumber.trim());
+                // Get locations breakdown
+                const locBreakdown = Object.entries(
+                    allAvailableUnits.reduce((acc, u) => {
+                        acc[u.location] = (acc[u.location] || 0) + 1;
+                        return acc;
+                    }, {})
+                ).map(([loc, qty]) => `${loc}: ${qty}`).join(', ');
+
+                // 1. Units with serial numbers get individual lines (from ALL locations)
+                const withSN = allAvailableUnits.filter(u => u.serialNumber && u.serialNumber.trim());
+                // 2. Units without serial numbers get a single bulk line for the source location
+                const withoutSNAtSource = availableUnitsAtSource.filter(u => !u.serialNumber || !u.serialNumber.trim());
 
                 withSN.forEach(u => {
                     const opt = document.createElement('option');
-                    opt.value = `${p.name} ${model ? `[${model}]` : ''} (Avail: 1) SN: ${u.serialNumber}`;
+                    opt.value = `${p.name} ${model ? `[${model}]` : ''} (Avail: 1) SN: ${u.serialNumber} [${u.location}]`;
                     opt.setAttribute('data-id', p._id || p.id);
                     opt.setAttribute('data-sn', u.serialNumber);
                     prodList.appendChild(opt);
                 });
 
-                if (withoutSN.length > 0 || (withSN.length === 0 && (p.category === 'supreme' || p.category === 'fitting'))) {
+                if (withoutSNAtSource.length > 0 || (withSN.length === 0 && (p.category === 'supreme' || p.category === 'fitting'))) {
                     const opt = document.createElement('option');
-                    opt.value = `${p.name} ${model ? `[${model}]` : ''} (Avail: ${withoutSN.length})`;
+                    opt.value = `${p.name} ${model ? `[${model}]` : ''} (Avail: ${withoutSNAtSource.length}) ${locBreakdown ? `[${locBreakdown}]` : '[No Stock]'}`;
                     opt.setAttribute('data-id', p._id || p.id);
                     prodList.appendChild(opt);
                 }
@@ -2111,20 +2171,6 @@ function printChallan(id) {
             .sign-box { border-top: 1px solid #000; padding-top: 4px; width: 30mm; text-align: center; }
         </style></head><body>
         <div class="shop-header">
-            ${(hasCri || hasSupreme) ? `
-            <div class="logo-header" style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 8px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
-                ${hasCri ? `
-                <svg viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg" style="width: 24px; height: 30px; display: inline-block;">
-                    <ellipse cx="60" cy="75" rx="55" ry="70" stroke="#d71920" stroke-width="5" fill="#fff" />
-                    <ellipse cx="60" cy="75" rx="50" ry="65" stroke="#d71920" stroke-width="2" fill="none" />
-                    <text x="60" y="96" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="52" fill="#fff" stroke="#d71920" stroke-width="3" text-anchor="middle" style="letter-spacing: -2px; transform: scaleY(1.4); transform-origin: 60px 75px;">CRI</text>
-                </svg>
-                ` : ''}
-                ${hasSupreme ? `
-                <div style="background: #d71920; color: white; font-family: 'Arial Black', Impact, sans-serif; font-style: italic; font-weight: 900; font-size: 10px; padding: 2px 5px; border-radius: 2px; letter-spacing: -0.3px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; height: 16px; text-transform: none; box-sizing: border-box; border: 1px solid #d71920;">Supreme</div>
-                ` : ''}
-            </div>
-            ` : ''}
             <div class="shop-name">SRI SAPTHAGIRI ELECTRICAL &amp; H/W</div>
             <div class="shop-info">
                 123, Nethaji Road, TIRUPATI-517501.<br>
@@ -2388,7 +2434,7 @@ async function deleteLocation(name) {
 function openLocationManager() {
     renderLocationList();
     document.getElementById('location-manager-modal').style.display = 'flex';
-    if (window.gsap) gsap.from('#location-manager-modal .modal-content', { scale: 0.88, opacity: 0, duration: 0.25 });
+    if (window.gsap) gsap.from('#location-manager-modal .modal-content', { scale: 0.88, opacity: 0, duration: 0.05 });
 }
 
 // ──────────────────────────────────────────
@@ -2505,7 +2551,7 @@ function openTransportHistory() {
     if (!modal) return;
 
     modal.style.display = 'flex';
-    if (window.gsap) gsap.from('#transport-history-modal .modal-content', { scale: 0.88, opacity: 0, duration: 0.25 });
+    if (window.gsap) gsap.from('#transport-history-modal .modal-content', { scale: 0.88, opacity: 0, duration: 0.05 });
 
     const filterSelect = document.getElementById('history-location-filter');
     if (filterSelect) {

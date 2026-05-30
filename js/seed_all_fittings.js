@@ -89,7 +89,7 @@ async function seed() {
                         name: name,
                         size: size,
                         stock: stock,
-                        location: "Main Godown"
+                        location: "SHOP"
                     };
                     
                     const res = await postData('/products', payload);

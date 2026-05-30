@@ -489,7 +489,7 @@ export function renderInventory(category) {
                 units = units.filter(u => u.location === window.selectedGodownFilter);
             }
             const locationGroups = Object.entries(units.reduce((acc, u) => {
-                const loc = u.location || 'Main Godown';
+                const loc = u.location || 'SHOP';
                 if (!acc[loc]) acc[loc] = [];
                 acc[loc].push(u.serialNumber);
                 return acc;
@@ -604,7 +604,7 @@ export function renderInventory(category) {
             </div>
             <div class="location-stock-breakdown">
                 ${Object.entries((p.units || []).filter(u => u.status === 'available').reduce((acc, u) => {
-            const loc = u.location || 'Main Godown';
+            const loc = u.location || 'SHOP';
             acc[loc] = (acc[loc] || 0) + 1;
             return acc;
         }, {})).map(([loc, count]) => `

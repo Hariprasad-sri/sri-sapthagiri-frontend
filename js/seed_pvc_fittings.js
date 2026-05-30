@@ -47,7 +47,7 @@ async function seed() {
                     name: `pvc ${itemName} ${size}`,
                     size: size,
                     stock: stock,
-                    location: "Main Godown"
+                    location: "SHOP"
                 };
                 
                 const res = await fetch(`${BASE_URL}/products`, {

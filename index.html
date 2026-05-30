@@ -13,12 +13,12 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
         rel="stylesheet">
     <!-- CSS -->
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=1.1.16">
     <!-- Scripts (External) -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <!-- App Logic -->
-    <script type="module" src="js/app.js?v=1.1.15"></script>
+    <script type="module" src="js/app.js?v=1.1.16"></script>
 </head>
 
 <body>
@@ -59,9 +59,20 @@
             <h1>Welcome Back</h1>
             <p>Access the Sri Sapthagiri Inventory Management System</p>
 
-            <div id="connection-status" class="status-indicator">
-                <span class="status-dot"></span>
-                <span class="status-text">Checking server connection...</span>
+            <div class="server-config-container" style="margin-bottom: 24px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                <div id="connection-status" class="status-indicator" style="margin-bottom: 0;">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Checking server connection...</span>
+                </div>
+                
+                <div class="server-selector-wrapper" style="display: inline-flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 4px 10px; border-radius: 12px; border: 1px solid var(--border-light);">
+                    <i data-lucide="database" style="width: 13px; height: 13px; color: var(--text-muted);"></i>
+                    <select id="server-select" style="background: transparent; border: none; font-size: 11px; font-weight: 600; color: var(--text-muted); outline: none; cursor: pointer; padding-right: 4px; font-family: inherit;">
+                        <option value="auto">Auto Connect</option>
+                        <option value="local">Local Server (5001)</option>
+                        <option value="live">Live Server (Render)</option>
+                    </select>
+                </div>
             </div>
 
             <div class="role-selector">
@@ -233,9 +244,14 @@
                         <div class="user-status-text">Active Session</div>
                     </div>
                 </div>
-                <button class="glass-btn" id="btn-logout" style="width: 100%;">
-                    <i data-lucide="log-out" size="16"></i> Logout
-                </button>
+                <div style="display: flex; gap: 8px;">
+                    <button class="glass-btn" id="btn-refresh-data" style="flex: 1; justify-content: center;" title="Sync Data">
+                        <i data-lucide="refresh-cw" size="16"></i> Sync
+                    </button>
+                    <button class="glass-btn" id="btn-logout" style="flex: 1; justify-content: center; background: rgba(239, 68, 68, 0.05); color: var(--danger); border-color: rgba(239, 68, 68, 0.2);">
+                        <i data-lucide="log-out" size="16"></i> Logout
+                    </button>
+                </div>
             </div>
         </aside>
 
@@ -430,28 +446,33 @@
             </section>
 
             <!-- Supreme Module View -->
-            <section id="supreme-view" class="page-view">
-                <div class="module-header"
-                    style="align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap:24px;">
+            <section id="supreme-view" class="page-view"
+                style="background: #f8fafc; padding: 24px; margin: -24px; min-height: 100vh;">
+                <div class="module-header" style="align-items: flex-start; margin-bottom: 32px;">
                     <div>
-                        <h1 id="pipes-inventory-header">Pipes Inventory</h1>
-                        <p style="color: #64748b; margin-top: 8px; max-width: 680px; line-height: 1.7;">Slot-based table
+                        <h1 id="pipes-inventory-header"
+                            style="font-size: 28px; font-weight: 700; color: #0f172a; margin-bottom: 4px; letter-spacing: -0.5px;">
+                            Pipes Inventory</h1>
+                        <p style="color: #64748b; font-size: 14px; margin: 0;">Slot-based table
                             structure for size and pressure mapping</p>
                     </div>
-                    <div
-                        style="display:flex; flex-wrap:wrap; gap:10px; margin-top:8px; margin-left: auto; align-items: center;">
+                    <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-left: auto; align-items: center; margin-top: -10px;">
                         <button class="glass-btn" onclick="openManagePipeCategoriesModal('supreme')"
-                            style="background: white; border: 1px solid #2563eb; color: #2563eb; font-weight: 500; padding: 8px 16px; border-radius: 6px;">Manage
-                            Categories</button>
+                            style="background: white; border: 1px solid #2563eb; color: #2563eb; font-weight: 600; padding: 8px 16px; border-radius: 6px;">
+                            <i data-lucide="layers" size="16"></i> Manage Categories
+                        </button>
                         <button class="glass-btn" onclick="openLocationManager()"
-                            style="background: white; border: 1px solid #2563eb; color: #2563eb; font-weight: 500; padding: 8px 16px; border-radius: 6px;">Manage
-                            Godowns</button>
+                            style="background: white; border: 1px solid #2563eb; color: #2563eb; font-weight: 600; padding: 8px 16px; border-radius: 6px;">
+                            <i data-lucide="map-pin" size="16"></i> Manage Godowns
+                        </button>
                         <button class="glass-btn" onclick="openManageSizesModal('pipe')"
-                            style="background: white; border: 1px solid #2563eb; color: #2563eb; font-weight: 500; padding: 8px 16px; border-radius: 6px;">Edit
-                            Columns</button>
+                            style="background: white; border: 1px solid #2563eb; color: #2563eb; font-weight: 600; padding: 8px 16px; border-radius: 6px;">
+                            <i data-lucide="edit-3" size="16"></i> Edit Columns
+                        </button>
                         <button class="glass-btn admin-only" onclick="openProductModal('supreme')"
-                            style="background: #2563eb; color: white; border: none; font-weight: 600; padding: 8px 16px; border-radius: 6px; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">ADD
-                            PIPES</button>
+                            style="background: #2563eb; color: white; border: none; font-weight: 600; padding: 8px 16px; border-radius: 6px; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">
+                            <i data-lucide="plus" size="16"></i> ADD PIPES
+                        </button>
                     </div>
                 </div>
 
@@ -832,9 +853,9 @@
                         </button>
                     </label>
                     <select id="prod-location" class="form-control" required>
-                        <option value="Main Godown">Main Godown</option>
-                        <option value="North Godown">North Godown</option>
-                        <option value="South Godown">South Godown</option>
+                        <option value="SHOP">SHOP</option>
+                        <option value="ROYAL NAGAR">ROYAL NAGAR</option>
+                        <option value="AVILALA">AVILALA</option>
                     </select>
                 </div>
 
@@ -1073,9 +1094,9 @@
                 <div class="form-group" id="req-source-group">
                     <label id="lbl-source-name">Source Godown</label>
                     <select id="req-source" class="form-control" onchange="refreshAllProductDropdowns()" required>
-                        <option value="Main Godown">Main Godown</option>
-                        <option value="North Godown">North Godown</option>
-                        <option value="South Godown">South Godown</option>
+                        <option value="SHOP">SHOP</option>
+                        <option value="ROYAL NAGAR">ROYAL NAGAR</option>
+                        <option value="AVILALA">AVILALA</option>
                     </select>
                 </div>
 
@@ -1148,9 +1169,9 @@
                         <input type="number" id="stock-add-qty" class="form-control" min="1" placeholder="Qty"
                             style="width: 80px;" required>
                         <select id="stock-location" class="form-control" style="flex:1;" required>
-                            <option value="Main Godown">Main Godown</option>
-                            <option value="North Godown">North Godown</option>
-                            <option value="South Godown">South Godown</option>
+                            <option value="SHOP">SHOP</option>
+                            <option value="ROYAL NAGAR">ROYAL NAGAR</option>
+                            <option value="AVILALA">AVILALA</option>
                         </select>
                         <button type="submit" class="glass-btn"
                             style="background: var(--secondary); color:white; white-space:nowrap;">

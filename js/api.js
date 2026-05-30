@@ -1,11 +1,39 @@
 // API client — all fetch calls go through here
-// Dynamic BASE_URL detection
 const LIVE_BACKEND_URL = 'https://sri-sapthagiri-api.onrender.com/api';
+const LOCAL_BACKEND_URL = 'http://localhost:5001/api';
 
-// Point to local backend when running locally, otherwise use the live backend
-export const BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:5001/api'
-    : LIVE_BACKEND_URL;
+const savedServer = localStorage.getItem('ss_server_type');
+
+function getInitialBaseUrl() {
+    if (savedServer === 'local') return LOCAL_BACKEND_URL;
+    if (savedServer === 'live') return LIVE_BACKEND_URL;
+
+    // Auto-detect: if running on localhost, local IP, or file:/// protocol, use the local backend
+    const isLocal = window.location.hostname === 'localhost' || 
+                    window.location.hostname === '127.0.0.1' || 
+                    window.location.hostname === '' || 
+                    window.location.protocol === 'file:' ||
+                    window.location.hostname.startsWith('192.168.') ||
+                    window.location.hostname.startsWith('10.') ||
+                    window.location.hostname.endsWith('.local');
+    return isLocal ? LOCAL_BACKEND_URL : LIVE_BACKEND_URL;
+}
+
+export let BASE_URL = getInitialBaseUrl();
+
+export function updateBaseUrl(type) {
+    if (type === 'local') {
+        localStorage.setItem('ss_server_type', 'local');
+        BASE_URL = LOCAL_BACKEND_URL;
+    } else if (type === 'live') {
+        localStorage.setItem('ss_server_type', 'live');
+        BASE_URL = LIVE_BACKEND_URL;
+    } else {
+        localStorage.removeItem('ss_server_type');
+        BASE_URL = getInitialBaseUrl();
+    }
+    return BASE_URL;
+}
 
 
 
@@ -75,7 +103,7 @@ export async function updateProduct(id, data) {
     return handleResponse(res);
 }
 
-export async function addStock(id, qty, serialNumbers = [], location = 'Main Godown') {
+export async function addStock(id, qty, serialNumbers = [], location = 'SHOP') {
     const res = await fetch(`${BASE_URL}/products/${id}/add-stock`, {
         method: 'PATCH',
         headers: headers(),
