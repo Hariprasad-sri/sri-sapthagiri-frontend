@@ -1,4 +1,4 @@
-import { state } from './state.js?v=1.2.0';
+import { state } from './state.js?v=1.2.1';
 
 export function initIcons() {
     if (window.lucide) {
@@ -229,8 +229,10 @@ function renderPipeDashboard() {
                         stockVal = p.stock || 0;
                     }
                 }
+                const isLowStock = p && stockVal <= (p.lowStockLimit || 10);
+                const stockColorStyle = isLowStock ? 'color: var(--danger) !important; font-weight: 700;' : 'color: #0f172a;';
                 return `<td style="padding:18px 16px; text-align:center; vertical-align:middle;">
-                    <div data-id="${p ? getId(p) : ''}" data-cat="supreme" data-subcat="${pipeType.replace(/"/g, '&quot;')}" data-size="${size.replace(/"/g, '&quot;')}" data-col="${col.replace(/"/g, '&quot;')}" data-value="${stockVal}" style="font-size:15px; font-weight:500; color:#0f172a; cursor:pointer;" onclick="window.openMatrixAddStockModalFromElement(this)">
+                    <div data-id="${p ? getId(p) : ''}" data-cat="supreme" data-subcat="${pipeType.replace(/"/g, '&quot;')}" data-size="${size.replace(/"/g, '&quot;')}" data-col="${col.replace(/"/g, '&quot;')}" data-value="${stockVal}" style="font-size:15px; font-weight:500; ${stockColorStyle} cursor:pointer;" onclick="window.openMatrixAddStockModalFromElement(this)">
                         ${stockVal}
                     </div>
                 </td>`;
@@ -265,6 +267,10 @@ function renderPipeDashboard() {
             } else {
                 stockVal = p.stock || 0;
             }
+            const isLowStock = p && stockVal <= (p.lowStockLimit || 10);
+            const pillStyle = isLowStock 
+                ? 'color: var(--danger); background: rgba(239, 68, 68, 0.05);' 
+                : 'color: #2563eb; background: rgba(37, 99, 235, 0.05);';
             return `
                 <tr style="border-bottom:1px solid #e2e8f0;">
                     <td style="padding:18px 16px; color:#0f172a; font-weight:700; font-size:15px;">
@@ -272,7 +278,7 @@ function renderPipeDashboard() {
                             <div style="display:flex; align-items:center;">
                                 ${size} <i data-lucide="edit-2" class="cursor-pointer admin-only" style="margin-left: 10px; color: #0f172a; opacity:0.8;" size="14" onclick="window.editPipeSize('${size.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', '${currentPipeTab.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')" title="Edit Size"></i>
                             </div>
-                            <div data-id="${getId(p)}" data-cat="supreme" data-subcat="${currentPipeTab.replace(/"/g, '&quot;')}" data-size="${size.replace(/"/g, '&quot;')}" data-col="${pipeType.replace(/"/g, '&quot;')}" data-value="${stockVal}" style="font-size:15px; font-weight:600; color:#2563eb; background:rgba(37,99,235,0.05); padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="window.openMatrixAddStockModalFromElement(this)">
+                            <div data-id="${getId(p)}" data-cat="supreme" data-subcat="${currentPipeTab.replace(/"/g, '&quot;')}" data-size="${size.replace(/"/g, '&quot;')}" data-col="${pipeType.replace(/"/g, '&quot;')}" data-value="${stockVal}" style="font-size:15px; font-weight:600; ${pillStyle} padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="window.openMatrixAddStockModalFromElement(this)">
                                 Stock: ${stockVal}
                             </div>
                         </div>
@@ -302,7 +308,7 @@ function renderPipeDashboard() {
 window.setPipeTab = async function(tab) {
     currentPipeTab = tab;
     try {
-        const { fetchPipeColumns } = await import('./api.js?v=1.2.0');
+        const { fetchPipeColumns } = await import('./api.js?v=1.2.1');
         const columns = await fetchPipeColumns(tab);
         state.pipeColumns.splice(0, state.pipeColumns.length, ...columns);
     } catch (err) {
@@ -412,10 +418,11 @@ export function renderFittingMatrix() {
                             stockVal = product.stock;
                         }
                     }
-                    const stockClass = product && stockVal <= (product.lowStockLimit || 10) ? 'color: var(--danger); font-weight: 700;' : '';
+                    const isLowStock = product && stockVal <= (product.lowStockLimit || 10);
+                    const stockColorStyle = isLowStock ? 'color: var(--danger) !important; font-weight: 700;' : 'color: #0f172a;';
                     
-                    rowHtml += `<td style="${stockClass} text-align:center; min-width:90px; vertical-align:middle;" ${product ? `data-id="${getId(product)}"` : ''}>
-                        <div data-id="${product ? getId(product) : ''}" data-cat="fitting" data-subcat="${currentFittingTab.replace(/"/g, '&quot;')}" data-size="${size.replace(/"/g, '&quot;')}" data-col="${itemName.replace(/"/g, '&quot;')}" data-value="${stockVal}" style="font-size:15px; font-weight:500; color:#0f172a; cursor:pointer;" onclick="window.openMatrixAddStockModalFromElement(this)">
+                    rowHtml += `<td style="text-align:center; min-width:90px; vertical-align:middle;" ${product ? `data-id="${getId(product)}"` : ''}>
+                        <div data-id="${product ? getId(product) : ''}" data-cat="fitting" data-subcat="${currentFittingTab.replace(/"/g, '&quot;')}" data-size="${size.replace(/"/g, '&quot;')}" data-col="${itemName.replace(/"/g, '&quot;')}" data-value="${stockVal}" style="font-size:15px; font-weight:500; ${stockColorStyle} cursor:pointer;" onclick="window.openMatrixAddStockModalFromElement(this)">
                             ${stockVal}
                         </div>
                     </td>`;
@@ -447,7 +454,7 @@ export function renderFittingMatrix() {
 window.setFittingTab = async function(tab) {
     currentFittingTab = tab;
     try {
-        const { fetchPipeColumns } = await import('./api.js?v=1.2.0');
+        const { fetchPipeColumns } = await import('./api.js?v=1.2.1');
         const columns = await fetchPipeColumns(tab);
         state.fittingColumns.splice(0, state.fittingColumns.length, ...columns);
     } catch (err) {

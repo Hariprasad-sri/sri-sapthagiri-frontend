@@ -1,6 +1,6 @@
-import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.2.0';
-import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, updateBaseUrl, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.2.0';
-import { state } from './state.js?v=1.2.0';
+import { renderAll, renderInventory, renderRequests, initIcons } from './ui.js?v=1.2.1';
+import { loginUser, fetchProducts, createProduct, updateProduct, addStock, deleteProduct, bulkDeleteProducts, fetchRequests, createRequest, updateRequestStatus, returnRequest, deleteRequest, fetchLogs, fetchRetentionStats, purgeOldData, BASE_URL, updateBaseUrl, fetchLocations, addLocation as apiAddLocation, deleteLocation as apiDeleteLocation, fetchPipeCategories, createPipeCategory, updatePipeCategory, deletePipeCategory, fetchPipeColumns, savePipeColumns } from './api.js?v=1.2.1';
+import { state } from './state.js?v=1.2.1';
 
 // ──────────────────────────────────────────
 // INIT
@@ -1203,7 +1203,7 @@ function openProductModal(category, id = null) {
     document.getElementById('prod-subcategory-group').style.display = isSupremeOrFitting ? 'block' : 'none';
     document.getElementById('prod-location-group').style.display = isSupremeOrFitting ? 'none' : 'block';
     document.getElementById('prod-stock-group').style.display = (isSupremeOrFitting || isMotor) ? 'none' : 'block';
-    document.getElementById('prod-low-limit-group').style.display = isSupremeOrFitting ? 'none' : 'block';
+    document.getElementById('prod-low-limit-group').style.display = 'block';
     document.getElementById('prod-model-group').style.display = isMotor ? 'none' : 'block';
 
     // Toggle label and placeholder of Model / Pipe Size field
@@ -1335,7 +1335,7 @@ async function handleProductSubmit(e) {
     const type = document.getElementById('prod-type')?.value.trim() || '';
     const location = document.getElementById('prod-location').value;
     const stock = isSupremeOrFitting ? 0 : (parseInt(document.getElementById('prod-stock').value) || 0);
-    const lowStockLimit = isSupremeOrFitting ? 10 : (parseInt(document.getElementById('prod-low-limit').value) || 10);
+    const lowStockLimit = parseInt(document.getElementById('prod-low-limit').value) || 10;
     const subCategory = document.getElementById('prod-subcategory')?.value.trim() || '';
 
     if (isSupremeOrFitting) {
@@ -1376,7 +1376,7 @@ async function handleProductSubmit(e) {
     } else {
         if (!name) { showError('prod-name', 'err-name', 'Product name is required.'); hasError = true; }
     }
-    if (!isSupremeOrFitting && lowStockLimit < 0) {
+    if (lowStockLimit < 0) {
         document.getElementById('err-low-limit').textContent = 'Alert limit cannot be negative.';
         hasError = true;
     }
