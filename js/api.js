@@ -27,9 +27,15 @@ function getInitialBaseUrl() {
 
 export let BASE_URL = getInitialBaseUrl();
 
-// Global fetch interceptor for production self-healing
+// Global fetch interceptor for production self-healing and cache-busting
 const originalFetch = window.fetch;
 window.fetch = async function(url, options = {}) {
+    const method = (options.method || 'GET').toUpperCase();
+    if (method === 'GET' && typeof url === 'string') {
+        const separator = url.includes('?') ? '&' : '?';
+        url = `${url}${separator}t=${Date.now()}`;
+        options.cache = 'no-store';
+    }
     try {
         const res = await originalFetch(url, options);
 
@@ -37,7 +43,14 @@ window.fetch = async function(url, options = {}) {
         if (res.status === 503) {
             console.warn('Server DB not ready (503), retrying in 3s...');
             await new Promise(r => setTimeout(r, 3000));
-            return await originalFetch(url, options);
+            // Apply cache-busting on retry as well
+            let retryUrl = url;
+            if (typeof retryUrl === 'string') {
+                const cleanUrl = retryUrl.split(/[?&]t=\d+/)[0];
+                const separator = cleanUrl.includes('?') ? '&' : '?';
+                retryUrl = `${cleanUrl}${separator}t=${Date.now()}`;
+            }
+            return await originalFetch(retryUrl, options);
         }
 
         return res;
@@ -47,7 +60,11 @@ window.fetch = async function(url, options = {}) {
             console.warn("Fetch failed for local backend; attempting to switch to live backend.");
             localStorage.removeItem('ss_server_type');
             BASE_URL = LIVE_BACKEND_URL;
-            const newUrl = url.replace(LOCAL_BACKEND_URL, LIVE_BACKEND_URL);
+            let newUrl = url.replace(LOCAL_BACKEND_URL, LIVE_BACKEND_URL);
+            // Apply fresh cache-busting timestamp for the live fallback url
+            const cleanUrl = newUrl.split(/[?&]t=\d+/)[0];
+            const separator = cleanUrl.includes('?') ? '&' : '?';
+            newUrl = `${cleanUrl}${separator}t=${Date.now()}`;
             return await originalFetch(newUrl, options);
         }
         // Otherwise rethrow the original error.

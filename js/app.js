@@ -620,6 +620,22 @@ function setupEventListeners() {
     document.getElementById('btn-add-location')?.addEventListener('click', () => addLocation());
     document.getElementById('new-location-input')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') addLocation(); });
 
+    // Category Manager listeners
+    document.getElementById('new-manage-category-name')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            submitNewCategoryFromManageModal();
+        }
+    });
+
+    // Pipe Columns Manager listeners
+    document.getElementById('new-pipe-column-name')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addPipeColumnOption();
+        }
+    });
+
     // Mobile Menu
     const menuToggle = document.getElementById('menu-toggle');
     const sidebar = document.getElementById('sidebar');
