@@ -116,7 +116,26 @@ export async function loginUser(role, password = '') {
 // ──────────────────────────────────────────
 export async function fetchProducts() {
     const res = await fetch(`${BASE_URL}/products`);
-    return handleResponse(res);
+    const products = await handleResponse(res);
+    
+    // Reconstruct units array on client side for non-serialized products
+    if (Array.isArray(products)) {
+        for (let p of products) {
+            if (p.locationStock) {
+                p.units = [];
+                for (let [location, qty] of Object.entries(p.locationStock)) {
+                    for (let i = 0; i < qty; i++) {
+                        p.units.push({
+                            serialNumber: '',
+                            status: 'available',
+                            location: location
+                        });
+                    }
+                }
+            }
+        }
+    }
+    return products;
 }
 
 export async function createProduct(data) {
