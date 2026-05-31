@@ -1,4 +1,4 @@
-import { state } from './state.js?v=1.2.3';
+import { state } from './state.js?v=1.2.4';
 
 export function initIcons() {
     if (window.lucide) {
