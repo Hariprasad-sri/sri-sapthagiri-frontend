@@ -2415,7 +2415,12 @@ function renderLocationList() {
         return `
             <div class="flex justify-between items-center glass-row cursor-pointer" style="padding:12px 16px; border:1px solid ${isSelected ? '#2563eb' : 'var(--border-light)'}; border-radius:12px; background:${isSelected ? 'rgba(37,99,235,0.08)' : 'rgba(255,255,255,0.4)'}; margin-bottom:4px;" onclick="window.selectGodown('${loc.name.replace(/'/g, "\\'")}')">
                 <span style="font-weight:600; color:${isSelected ? '#2563eb' : 'inherit'};">${loc.name}</span>
-                ${isSelected ? '<i data-lucide="check" size="16" style="color:#2563eb;"></i>' : '<i data-lucide="chevron-right" size="16" style="color:var(--text-muted);"></i>'}
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <button type="button" onclick="event.stopPropagation(); window.deleteLocation('${loc.name.replace(/'/g, "\\'")}')" style="background:transparent; border:none; color:#ef4444; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:4px;" title="Delete Location">
+                        <i data-lucide="trash-2" size="16"></i>
+                    </button>
+                    ${isSelected ? '<i data-lucide="check" size="16" style="color:#2563eb;"></i>' : '<i data-lucide="chevron-right" size="16" style="color:var(--text-muted);"></i>'}
+                </div>
             </div>
         `;
     }).join('');
