@@ -508,6 +508,9 @@ async function deleteImplicitCategoryAction(name, type) {
 }
 
 window.deleteImplicitCategoryAction = deleteImplicitCategoryAction;
+window.savePipeCategoryChanges = savePipeCategoryChanges;
+window.deletePipeCategoryAction = deletePipeCategoryAction;
+window.togglePipeCategoryActive = togglePipeCategoryActive;
 
 // ──────────────────────────────────────────
 // EVENT LISTENERS
