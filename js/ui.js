@@ -476,9 +476,9 @@ export function renderInventory(category) {
     const searchTerm = searchEl ? searchEl.value.toLowerCase() : '';
     const prods = state.products.filter(p =>
         p.category === category &&
-        (p.name.toLowerCase().includes(searchTerm) ||
-            Object.values(p.specs || {}).some(v => String(v).toLowerCase().includes(searchTerm)) ||
-            (p.units || []).some(u => u.serialNumber.toLowerCase().includes(searchTerm)))
+        (((p.name || '').toLowerCase().includes(searchTerm)) ||
+            Object.values(p.specs || {}).some(v => String(v || '').toLowerCase().includes(searchTerm)) ||
+            (p.units || []).some(u => u.serialNumber && typeof u.serialNumber === 'string' && u.serialNumber.toLowerCase().includes(searchTerm)))
     );
     if (category === 'cri') {
         const headerTitle = document.getElementById('motors-inventory-header');

@@ -1423,6 +1423,8 @@ async function handleProductSubmit(e) {
 
     if (isSupremeOrFitting) {
         name = (subCategory || 'General') + ' ' + model;
+    } else if (isMotor) {
+        name = type || `Motor ${hp}${phase ? ' ' + phase : ''}`;
     }
 
     // Build specs for backward compat
@@ -1472,13 +1474,7 @@ async function handleProductSubmit(e) {
             const serialRaw = document.getElementById('prod-serials').value;
             const serialNumbers = serialRaw.split(/[\s,]+/).map(s => s.trim()).filter(s => s);
 
-            if (isMotor && !name) {
-                // When creating motors, use type as the product title if no name is visible.
-                const normalizedName = type || `Motor ${hp}${phase ? ' ' + phase : ''}`;
-                if (normalizedName) {
-                    name = normalizedName;
-                }
-            }
+
 
             // Client-side unique check
             const unique = new Set(serialNumbers);
