@@ -31,24 +31,26 @@ export let BASE_URL = getInitialBaseUrl();
 const originalFetch = window.fetch;
 window.fetch = async function(url, options = {}) {
     try {
-        return await originalFetch(url, options);
-    } catch (err) {
-        // Auto-detect: if running on a production/live domain, but calling localhost
-        const isLocalHost = window.location.hostname === 'localhost' || 
-                            window.location.hostname === '127.0.0.1' || 
-                            window.location.hostname === '' || 
-                            window.location.protocol === 'file:' ||
-                            window.location.hostname.startsWith('192.168.') ||
-                            window.location.hostname.startsWith('10.') ||
-                            window.location.hostname.endsWith('.local');
+        const res = await originalFetch(url, options);
 
-        if (!isLocalHost && typeof url === 'string' && url.includes(LOCAL_BACKEND_URL)) {
-            console.warn("CORS/Connection error detected on production domain while connected to local server. Self-healing: switching to Live Backend.");
+        // If server is starting up (503 = DB not ready yet), wait and retry once
+        if (res.status === 503) {
+            console.warn('Server DB not ready (503), retrying in 3s...');
+            await new Promise(r => setTimeout(r, 3000));
+            return await originalFetch(url, options);
+        }
+
+        return res;
+    } catch (err) {
+        // If the request was targeting the local backend, fall back to the live backend.
+        if (typeof url === 'string' && url.includes(LOCAL_BACKEND_URL)) {
+            console.warn("Fetch failed for local backend; attempting to switch to live backend.");
             localStorage.removeItem('ss_server_type');
             BASE_URL = LIVE_BACKEND_URL;
             const newUrl = url.replace(LOCAL_BACKEND_URL, LIVE_BACKEND_URL);
             return await originalFetch(newUrl, options);
         }
+        // Otherwise rethrow the original error.
         throw err;
     }
 };
